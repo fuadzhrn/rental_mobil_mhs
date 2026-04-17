@@ -13,10 +13,10 @@
 
         <div class="footer-col">
             <h4>Navigasi</h4>
-            <a href="#top">Home</a>
-            <a href="#katalog">Katalog</a>
-            <a href="#promo">Promo</a>
-            <a href="#tentang">Tentang</a>
+            <a href="{{ route('home') }}">Home</a>
+            <a href="{{ route('katalog') }}">Katalog</a>
+            <a href="{{ route('home') }}#promo">Promo</a>
+            <a href="{{ route('home') }}#tentang">Tentang</a>
         </div>
 
         <div class="footer-col">
