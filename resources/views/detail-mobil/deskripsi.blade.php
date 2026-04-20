@@ -7,16 +7,13 @@
             </div>
 
             <p>
-                BMW 320i Sport menghadirkan kombinasi performa responsif, kenyamanan premium,
-                dan desain elegan untuk perjalanan bisnis maupun personal. Kabin yang senyap,
-                material interior berkualitas, serta handling stabil menjadikan kendaraan ini
-                ideal untuk Anda yang mengutamakan pengalaman berkendara kelas atas.
+                {{ $vehicle->description ?: 'Deskripsi kendaraan belum diisi oleh admin rental. Informasi kendaraan akan diperbarui sesuai data armada yang tersedia.' }}
             </p>
 
             <ul class="key-points">
-                <li>Akselerasi halus dan tenaga merata untuk perjalanan dalam kota maupun luar kota.</li>
-                <li>Interior premium dengan jok ergonomis yang nyaman untuk durasi perjalanan panjang.</li>
-                <li>Cocok untuk perjalanan bisnis eksekutif, event resmi, dan wisata keluarga kecil.</li>
+                <li>Unit ini dikelola langsung oleh rental company yang sudah terverifikasi.</li>
+                <li>Status kendaraan aktif sehingga dapat ditampilkan ke customer pada katalog.</li>
+                <li>Detail booking penuh akan dihubungkan pada tahap backend berikutnya.</li>
             </ul>
         </article>
     </div>

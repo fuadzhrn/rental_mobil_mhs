@@ -5,16 +5,23 @@
             <span>Filter</span>
         </button>
 
-        <p>Menampilkan <strong>12 kendaraan</strong></p>
+        <p>Menampilkan <strong>{{ $summaryCount }} kendaraan</strong></p>
     </div>
 
-    <div class="sorting-actions">
+    <form class="sorting-actions" action="{{ route('katalog.index') }}" method="get">
+        <input type="hidden" name="q" value="{{ request('q') }}">
+        <input type="hidden" name="category" value="{{ request('category') }}">
+        <input type="hidden" name="transmission" value="{{ request('transmission') }}">
+        <input type="hidden" name="fuel_type" value="{{ request('fuel_type') }}">
+        <input type="hidden" name="seat_capacity" value="{{ request('seat_capacity') }}">
+        <input type="hidden" name="price_min" value="{{ request('price_min') }}">
+        <input type="hidden" name="price_max" value="{{ request('price_max') }}">
+
         <label for="urutkan">Urutkan:</label>
-        <select id="urutkan" name="sort">
-            <option>Harga Terendah</option>
-            <option>Harga Tertinggi</option>
-            <option>Terpopuler</option>
-            <option>Terbaru</option>
+        <select id="urutkan" name="sort" onchange="this.form.submit()">
+            <option value="newest" @selected($sort === 'newest')>Terbaru</option>
+            <option value="price_low" @selected($sort === 'price_low')>Harga Terendah</option>
+            <option value="price_high" @selected($sort === 'price_high')>Harga Tertinggi</option>
         </select>
-    </div>
+    </form>
 </section>

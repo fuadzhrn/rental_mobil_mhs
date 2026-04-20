@@ -16,7 +16,7 @@
                         <strong>Rp 525.000 <span>/ hari</span></strong>
                         <span class="rating"><i class="fa-solid fa-star"></i> 4.8</span>
                     </div>
-                    <a href="{{ route('detail-mobil') }}" class="btn btn-outline full-width">Lihat Detail</a>
+                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
                 </div>
             </article>
 
@@ -29,7 +29,7 @@
                         <strong>Rp 385.000 <span>/ hari</span></strong>
                         <span class="rating"><i class="fa-solid fa-star"></i> 4.7</span>
                     </div>
-                    <a href="{{ route('detail-mobil') }}" class="btn btn-outline full-width">Lihat Detail</a>
+                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
                 </div>
             </article>
 
@@ -42,7 +42,7 @@
                         <strong>Rp 475.000 <span>/ hari</span></strong>
                         <span class="rating"><i class="fa-solid fa-star"></i> 4.9</span>
                     </div>
-                    <a href="{{ route('detail-mobil') }}" class="btn btn-outline full-width">Lihat Detail</a>
+                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
                 </div>
             </article>
 
@@ -55,7 +55,7 @@
                         <strong>Rp 1.350.000 <span>/ hari</span></strong>
                         <span class="rating"><i class="fa-solid fa-star"></i> 4.9</span>
                     </div>
-                    <a href="{{ route('detail-mobil') }}" class="btn btn-outline full-width">Lihat Detail</a>
+                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
                 </div>
             </article>
         </div>

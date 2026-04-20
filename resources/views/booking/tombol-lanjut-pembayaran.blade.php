@@ -5,5 +5,5 @@
     </p>
 
     <a href="{{ route('pembayaran') }}" class="btn btn-primary full-width">Lanjut Pembayaran</a>
-    <a href="{{ route('detail-mobil') }}" class="btn btn-outline full-width">Kembali ke Detail Mobil</a>
+    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Kembali ke Katalog</a>
 </aside>

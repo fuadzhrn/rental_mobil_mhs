@@ -7,25 +7,29 @@
             </div>
 
             <div class="rental-profile">
-                <img src="https://i.pravatar.cc/96?img=24" alt="Logo Velora Signature Fleet">
+                @if ($vehicle->rentalCompany?->logo)
+                    <img src="{{ asset('storage/' . $vehicle->rentalCompany->logo) }}" alt="Logo {{ $vehicle->rentalCompany?->company_name }}">
+                @else
+                    <div style="width:96px; height:96px; border-radius:18px; background:#e5e7eb; display:flex; align-items:center; justify-content:center; color:#6b7280; font-size:12px;">Logo</div>
+                @endif
                 <div>
-                    <h3>Velora Signature Fleet</h3>
-                    <p>Rental premium dengan standar servis profesional dan unit kendaraan terawat.</p>
+                    <h3>{{ $vehicle->rentalCompany?->company_name }}</h3>
+                    <p>{{ $vehicle->rentalCompany?->description ?: 'Rental terverifikasi dengan unit kendaraan terawat dan layanan profesional.' }}</p>
                 </div>
             </div>
 
             <div class="rental-meta-grid">
-                <div><i class="fa-solid fa-location-dot"></i><span>Jl. HR Rasuna Said, Jakarta Selatan</span></div>
-                <div><i class="fa-solid fa-phone"></i><span>+62 811-7788-9900</span></div>
-                <div><i class="fa-regular fa-clock"></i><span>Operasional 06.00 - 22.00 WIB</span></div>
-                <div><i class="fa-solid fa-circle-check"></i><span>Terverifikasi sejak 2019</span></div>
+                <div><i class="fa-solid fa-location-dot"></i><span>{{ $vehicle->rentalCompany?->address }}, {{ $vehicle->rentalCompany?->city }}</span></div>
+                <div><i class="fa-solid fa-phone"></i><span>{{ $vehicle->rentalCompany?->phone }}</span></div>
+                <div><i class="fa-solid fa-envelope"></i><span>{{ $vehicle->rentalCompany?->email }}</span></div>
+                <div><i class="fa-solid fa-circle-check"></i><span>{{ ucfirst($vehicle->rentalCompany?->status_verification) }}</span></div>
             </div>
 
             <div class="rental-stats">
-                <article><strong>68+</strong><span>Unit Aktif</span></article>
-                <article><strong>7 Tahun</strong><span>Pengalaman</span></article>
-                <article><strong>4.8/5</strong><span>Rating Layanan</span></article>
-                <article><strong>5.200+</strong><span>Total Booking</span></article>
+                <article><strong>{{ $vehicle->rentalCompany?->vehicles()->count() ?? 0 }}</strong><span>Unit Aktif</span></article>
+                <article><strong>Approved</strong><span>Status Rental</span></article>
+                <article><strong>{{ $vehicle->rentalCompany?->city }}</strong><span>Kota Operasional</span></article>
+                <article><strong>Terverifikasi</strong><span>Oleh Super Admin</span></article>
             </div>
         </article>
     </div>

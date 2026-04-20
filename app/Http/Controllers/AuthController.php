@@ -2,26 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function showLoginForm(): View|RedirectResponse
+    public function showLoginForm(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
-            return $this->redirectByRole(request()->user()->role);
+            return $this->redirectByRole((string) $request->user()->role, $request);
         }
 
         return view('auth.login');
     }
 
+    public function showRegisterForm(Request $request): View|RedirectResponse
+    {
+        if (Auth::check()) {
+            return $this->redirectByRole((string) $request->user()->role, $request);
+        }
+
+        return view('auth.register');
+    }
+
     public function login(Request $request): RedirectResponse
     {
         if (Auth::check()) {
-            return $this->redirectByRole($request->user()->role);
+            return $this->redirectByRole((string) $request->user()->role, $request);
         }
 
         $credentials = $request->validate([
@@ -45,7 +56,46 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        return $this->redirectByRole($user->role, $request);
+        return $this->redirectByRole((string) $user->role, $request);
+    }
+
+    public function register(Request $request): RedirectResponse
+    {
+        if (Auth::check()) {
+            return $this->redirectByRole((string) $request->user()->role, $request);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'phone' => ['required', 'string', 'max:20'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'terms' => ['accepted'],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'name.max' => 'Nama maksimal 100 karakter.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar. Silakan login.',
+            'phone.required' => 'Nomor HP wajib diisi.',
+            'phone.max' => 'Nomor HP maksimal 20 karakter.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'terms.accepted' => 'Anda harus menyetujui syarat dan ketentuan.',
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'customer',
+        ]);
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'Pendaftaran berhasil. Silakan login sebagai customer.');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -58,7 +108,7 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
-    private function redirectByRole(string $role, ?Request $request = null): RedirectResponse
+    private function redirectByRole(string $role, Request $request): RedirectResponse
     {
         if ($role === 'super_admin') {
             return redirect()->route('super-admin.dashboard');
@@ -68,16 +118,16 @@ class AuthController extends Controller
             return redirect()->route('admin-rental.dashboard');
         }
 
-        if ($request) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect()->route('login')->withErrors([
-                'email' => 'Role akun tidak dikenali. Hubungi administrator.',
-            ]);
+        if ($role === 'customer') {
+            return redirect()->route('home');
         }
 
-        return redirect()->route('home');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->withErrors([
+            'email' => 'Role akun tidak dikenali. Hubungi administrator.',
+        ]);
     }
 }

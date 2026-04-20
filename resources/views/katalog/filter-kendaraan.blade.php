@@ -10,67 +10,60 @@
         </button>
     </div>
 
-    <form class="filter-card" action="#" method="get">
-        <div class="filter-block">
-            <h3>Harga per Hari</h3>
-            <input type="range" min="250000" max="2000000" value="850000">
-            <div class="range-meta">
-                <span>Rp 250.000</span>
-                <strong>Max Rp 850.000</strong>
-            </div>
-        </div>
+    <form class="filter-card" action="{{ route('katalog.index') }}" method="get">
+        <input type="hidden" name="q" value="{{ request('q') }}">
+        <input type="hidden" name="sort" value="{{ request('sort', 'newest') }}">
 
         <div class="filter-block">
-            <h3>Jenis Kendaraan</h3>
-            <label><input type="checkbox" checked> City Car</label>
-            <label><input type="checkbox"> MPV</label>
-            <label><input type="checkbox"> SUV</label>
-            <label><input type="checkbox"> Sedan</label>
+            <h3>Kategori</h3>
+            <select name="category">
+                <option value="">Semua Kategori</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category }}" @selected(request('category') === $category)>{{ $category }}</option>
+                @endforeach
+            </select>
         </div>
 
         <div class="filter-block">
             <h3>Transmisi</h3>
-            <label><input type="radio" name="transmisi" checked> Otomatis</label>
-            <label><input type="radio" name="transmisi"> Manual</label>
-        </div>
-
-        <div class="filter-block">
-            <h3>Kapasitas Kursi</h3>
-            <select>
-                <option>Semua Kapasitas</option>
-                <option>4 - 5 Kursi</option>
-                <option>6 - 7 Kursi</option>
-                <option>8+ Kursi</option>
+            <select name="transmission">
+                <option value="">Semua Transmisi</option>
+                @foreach ($transmissions as $transmission)
+                    <option value="{{ $transmission }}" @selected(request('transmission') === $transmission)>{{ $transmission }}</option>
+                @endforeach
             </select>
         </div>
 
         <div class="filter-block">
             <h3>Bahan Bakar</h3>
-            <label><input type="checkbox" checked> Bensin</label>
-            <label><input type="checkbox"> Diesel</label>
-            <label><input type="checkbox"> Hybrid</label>
-            <label><input type="checkbox"> Electric</label>
-        </div>
-
-        <div class="filter-block">
-            <h3>Rental / Perusahaan</h3>
-            <select>
-                <option>Semua Rental</option>
-                <option>Velora Partner Prime</option>
-                <option>UrbanDrive Rental</option>
-                <option>Skyline Mobility</option>
+            <select name="fuel_type">
+                <option value="">Semua Bahan Bakar</option>
+                @foreach ($fuelTypes as $fuelType)
+                    <option value="{{ $fuelType }}" @selected(request('fuel_type') === $fuelType)>{{ $fuelType }}</option>
+                @endforeach
             </select>
         </div>
 
         <div class="filter-block">
-            <h3>Status Ketersediaan</h3>
-            <label><input type="checkbox" checked> Tersedia</label>
-            <label><input type="checkbox" checked> Segera Tersedia</label>
-            <label><input type="checkbox"> Tidak Tersedia</label>
+            <h3>Kapasitas Kursi</h3>
+            <select name="seat_capacity">
+                <option value="">Semua Kapasitas</option>
+                @foreach ($seatCapacities as $seatCapacity)
+                    <option value="{{ $seatCapacity }}" @selected((string) request('seat_capacity') === (string) $seatCapacity)>{{ $seatCapacity }} Kursi</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="filter-block">
+            <h3>Harga per Hari</h3>
+            <div class="range-meta" style="display:grid; gap:10px;">
+                <input type="number" name="price_min" value="{{ request('price_min') }}" placeholder="Harga minimum">
+                <input type="number" name="price_max" value="{{ request('price_max') }}" placeholder="Harga maksimum">
+            </div>
         </div>
 
         <div class="filter-actions">
-            <button type="reset" class="btn btn-outline full-width">Reset Filter</button>
+            <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Reset Filter</a>
             <button type="submit" class="btn btn-primary full-width">Terapkan Filter</button>
         </div>
     </form>

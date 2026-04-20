@@ -26,8 +26,19 @@ class AdminUserSeeder extends Seeder
             ['email' => 'adminrental@example.com'],
             [
                 'name' => 'Admin Rental',
+                'phone' => '081234567891',
                 'password' => Hash::make('password123'),
                 'role' => 'admin_rental',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'customer@example.com'],
+            [
+                'name' => 'Customer Demo',
+                'phone' => '081234567890',
+                'password' => Hash::make('password123'),
+                'role' => 'customer',
             ]
         );
     }
