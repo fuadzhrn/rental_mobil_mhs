@@ -245,6 +245,14 @@ a {
 .catalog-filter {
     position: sticky;
     top: 104px;
+    display: block;
+}
+
+.filter-panel-head,
+.filter-close-btn,
+.filter-toggle-btn,
+.catalog-filter-overlay {
+    display: none;
 }
 
 .filter-card {

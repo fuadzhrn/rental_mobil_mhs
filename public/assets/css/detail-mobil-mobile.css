@@ -1,0 +1,304 @@
+@media (max-width: 1024px) {
+    body.detail-page {
+        min-width: 0;
+        background: var(--background);
+        padding-bottom: 112px;
+    }
+
+    .container {
+        width: min(100% - 56px, var(--container));
+    }
+
+    .detail-hero-section {
+        padding: 22px 0 14px;
+    }
+
+    .detail-hero-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .detail-right-column {
+        gap: 12px;
+    }
+
+    .detail-gallery-card,
+    .detail-main-info-card,
+    .detail-content-card,
+    .rental-info-card,
+    .reviews-wrapper {
+        border-radius: 18px;
+    }
+
+    .detail-gallery-card {
+        padding: 12px;
+    }
+
+    .gallery-main-photo img {
+        height: 280px;
+        border-radius: 12px;
+    }
+
+    .gallery-thumbnails {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .thumb {
+        min-width: 88px;
+        scroll-snap-align: start;
+    }
+
+    .thumb img {
+        height: 74px;
+    }
+
+    .detail-main-info-card {
+        padding: 18px;
+    }
+
+    .detail-main-info-card h1 {
+        font-size: clamp(1.6rem, 5.8vw, 2.1rem);
+    }
+
+    .badges-row {
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .meta-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .meta-item {
+        min-height: 42px;
+    }
+
+    .price-highlight {
+        margin-top: 14px;
+        padding: 12px;
+    }
+
+    .price-highlight strong {
+        font-size: 1.45rem;
+    }
+
+    .booking-sticky-card {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 12px;
+        top: auto;
+        z-index: 130;
+        border-radius: 16px;
+        padding: 12px 14px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "label status"
+            "price cta";
+        align-items: center;
+        gap: 4px 12px;
+        box-shadow: 0 16px 34px rgba(31, 41, 55, 0.18);
+        border: 1px solid #dfe7ff;
+        backdrop-filter: blur(6px);
+    }
+
+    .booking-label {
+        grid-area: label;
+        margin: 0;
+        font-size: 0.76rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .booking-sticky-card h3 {
+        grid-area: price;
+        margin: 0;
+        font-size: 1.16rem;
+        line-height: 1.2;
+    }
+
+    .booking-sticky-card h3 span {
+        font-size: 0.76rem;
+    }
+
+    .booking-meta {
+        grid-area: status;
+        margin: 0;
+        gap: 0;
+    }
+
+    .booking-meta li {
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .booking-meta li:not(:first-child) {
+        display: none;
+    }
+
+    .booking-sticky-card .btn-primary {
+        grid-area: cta;
+        width: auto;
+        min-width: 154px;
+        min-height: 44px;
+        border-radius: 12px;
+        padding: 0 16px;
+        font-size: 0.88rem;
+    }
+
+    .booking-sticky-card .btn-outline,
+    .booking-sticky-card .text-link {
+        display: none;
+    }
+
+    .detail-section {
+        padding-bottom: 16px;
+    }
+
+    .section-heading h2 {
+        font-size: clamp(1.35rem, 5vw, 1.75rem);
+        line-height: 1.25;
+    }
+
+    .spec-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .spec-item {
+        padding: 12px;
+    }
+
+    .detail-content-card {
+        padding: 18px;
+    }
+
+    .detail-content-card p,
+    .key-points li,
+    .terms-list li {
+        font-size: 0.95rem;
+    }
+
+    .key-points,
+    .terms-list {
+        margin-top: 12px;
+        padding-left: 18px;
+    }
+
+    .rental-info-card {
+        padding: 18px;
+    }
+
+    .rental-profile {
+        align-items: flex-start;
+        margin-bottom: 14px;
+    }
+
+    .rental-profile img {
+        width: 58px;
+        height: 58px;
+    }
+
+    .rental-meta-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .rental-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .reviews-wrapper {
+        padding: 18px;
+    }
+
+    .review-summary {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .score-card {
+        padding: 16px;
+    }
+
+    .score-card strong {
+        font-size: 2.1rem;
+    }
+
+    .score-bars div {
+        grid-template-columns: 74px 1fr;
+        gap: 8px;
+    }
+
+    .review-list {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .review-card {
+        padding: 12px;
+    }
+
+    .site-footer .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 46px 0 28px;
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        width: min(100% - 32px, var(--container));
+    }
+
+    body.detail-page {
+        padding-bottom: 106px;
+    }
+
+    .gallery-main-photo img {
+        height: 226px;
+    }
+
+    .detail-main-info-card {
+        padding: 16px;
+    }
+
+    .meta-item {
+        font-size: 0.85rem;
+    }
+
+    .spec-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-sticky-card {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        padding: 10px 12px;
+        gap: 2px 10px;
+    }
+
+    .booking-sticky-card h3 {
+        font-size: 1.04rem;
+    }
+
+    .booking-meta li {
+        font-size: 0.76rem;
+    }
+
+    .booking-sticky-card .btn-primary {
+        min-width: 138px;
+        min-height: 42px;
+        font-size: 0.82rem;
+        padding: 0 12px;
+    }
+}

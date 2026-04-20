@@ -5,13 +5,16 @@
     </div>
 
     <div class="invoice-list">
-        <div><span>No. Invoice</span><strong>INV-VLR-2026-0417</strong></div>
+        <div><span>Nomor Invoice</span><strong>INV-VLR-2026-0417</strong></div>
         <div><span>Tanggal Transaksi</span><strong>17 Apr 2026</strong></div>
         <div><span>Nama Penyewa</span><strong>Rendy Saputra</strong></div>
-        <div><span>Kendaraan</span><strong>BMW 320i Sport</strong></div>
-        <div><span>Rental</span><strong>Velora Signature Fleet</strong></div>
+        <div><span>Nama Kendaraan</span><strong>BMW 320i Sport</strong></div>
+        <div><span>Nama Rental</span><strong>Velora Signature Fleet</strong></div>
         <div><span>Metode Pembayaran</span><strong>Transfer Bank BCA</strong></div>
-        <div><span>Status Transaksi</span><strong class="status-text">Menunggu Verifikasi</strong></div>
+        <div>
+            <span>Status Transaksi</span>
+            <strong><span class="invoice-status-chip">Menunggu Verifikasi</span></strong>
+        </div>
     </div>
 
     <div class="invoice-total">
@@ -20,7 +23,9 @@
     </div>
 
     <div class="invoice-actions">
-        <a href="{{ route('pembayaran.invoice') }}" class="btn btn-outline full-width">Download Invoice</a>
-        <a href="{{ route('pembayaran.cetak') }}" class="btn btn-primary full-width">Cetak Bukti Transaksi</a>
+        <a href="{{ route('pembayaran.cetak') }}" class="btn btn-primary full-width">Cetak Bukti Pembayaran</a>
+        <a href="{{ route('pembayaran.invoice') }}" class="btn btn-outline full-width">Cetak Invoice</a>
+        <a href="{{ route('pembayaran.cetak') }}" class="btn btn-outline full-width btn-download-secondary">Download Bukti Pembayaran</a>
+        <a href="{{ route('pembayaran.invoice') }}" class="btn btn-outline full-width btn-download-secondary">Download Invoice</a>
     </div>
 </section>

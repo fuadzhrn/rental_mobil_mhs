@@ -1,0 +1,273 @@
+@media (max-width: 1024px) {
+    body.pembayaran-page {
+        min-width: 0;
+        background: var(--background);
+        padding-bottom: 20px;
+    }
+
+    .container {
+        width: min(100% - 56px, var(--container));
+    }
+
+    .desktop-only-block {
+        display: none;
+    }
+
+    .mobile-only-block {
+        display: block;
+    }
+
+    .payment-layout-section {
+        padding: 20px 0 58px;
+    }
+
+    .payment-layout {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .payment-main-column {
+        gap: 14px;
+    }
+
+    .payment-card {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .section-heading h2 {
+        font-size: clamp(1.35rem, 5vw, 1.75rem);
+    }
+
+    .order-summary-head {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .order-summary-head img {
+        height: 190px;
+        border-radius: 12px;
+    }
+
+    .order-summary-list {
+        gap: 8px;
+    }
+
+    .order-summary-list div {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #ecf0f7;
+    }
+
+    .summary-total-box {
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+
+    .summary-total-box strong {
+        font-size: 1.35rem;
+    }
+
+    .method-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .method-item {
+        grid-template-columns: 20px 1fr;
+        min-height: 58px;
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .method-item strong {
+        font-size: 0.94rem;
+    }
+
+    .method-item small {
+        font-size: 0.84rem;
+    }
+
+    .payment-detail-grid {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+    .detail-item {
+        padding: 11px;
+    }
+
+    .detail-item strong {
+        font-size: 0.92rem;
+    }
+
+    .tiny-btn {
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+    }
+
+    .instruction-box {
+        margin-top: 12px;
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .instruction-box ol {
+        padding-left: 18px;
+    }
+
+    .upload-box {
+        padding: 18px 14px;
+        gap: 7px;
+    }
+
+    .upload-box input {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .upload-meta {
+        display: grid;
+        gap: 10px;
+    }
+
+    .upload-meta .btn {
+        width: 100%;
+        min-height: 46px;
+    }
+
+    .status-steps {
+        gap: 8px;
+    }
+
+    .step {
+        grid-template-columns: 16px 1fr;
+        border-radius: 12px;
+        padding: 10px;
+    }
+
+    .step h3 {
+        font-size: 0.92rem;
+    }
+
+    .step p {
+        font-size: 0.84rem;
+    }
+
+    .invoice-list {
+        gap: 8px;
+    }
+
+    .invoice-list div {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #ecf0f7;
+    }
+
+    .invoice-total {
+        margin-top: 12px;
+        padding-top: 12px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .invoice-total strong {
+        font-size: 1.25rem;
+    }
+
+    .invoice-actions {
+        margin-top: 10px;
+        gap: 10px;
+    }
+
+    .invoice-actions .btn {
+        min-height: 48px;
+        font-size: 0.9rem;
+        border-radius: 12px;
+    }
+
+    .invoice-actions .btn.btn-primary {
+        box-shadow: 0 10px 20px rgba(108, 140, 245, 0.2);
+    }
+
+    .invoice-actions .btn-download-secondary {
+        background: #f8fafc;
+        border-color: #e5e7eb;
+        color: #475569;
+    }
+
+    .invoice-status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 10px;
+        background: #eef4ff;
+        color: #3655b8;
+        border: 1px solid #d8e5ff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .site-footer .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 46px 0 28px;
+    }
+}
+
+@media (min-width: 1025px) {
+    .mobile-only-block {
+        display: none;
+    }
+
+    .desktop-only-block {
+        display: grid;
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        width: min(100% - 32px, var(--container));
+    }
+
+    .payment-card {
+        padding: 16px;
+    }
+
+    .order-summary-head img {
+        height: 174px;
+    }
+
+    .summary-total-box strong {
+        font-size: 1.24rem;
+    }
+
+    .method-item {
+        min-height: 54px;
+    }
+
+    .upload-box i {
+        font-size: 1.3rem;
+    }
+
+    .upload-box p {
+        font-size: 0.92rem;
+    }
+
+    .upload-box small {
+        font-size: 0.8rem;
+    }
+}

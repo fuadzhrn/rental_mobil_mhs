@@ -1,0 +1,266 @@
+@media (max-width: 1024px) {
+    body.booking-page {
+        min-width: 0;
+        background: var(--background);
+        padding-bottom: 112px;
+    }
+
+    .container {
+        width: min(100% - 56px, var(--container));
+    }
+
+    .booking-layout-section {
+        padding: 20px 0 56px;
+    }
+
+    .booking-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .booking-main-column,
+    .booking-side-column {
+        gap: 14px;
+    }
+
+    .booking-side-column {
+        position: static;
+    }
+
+    .booking-card,
+    .vehicle-summary-card,
+    .cost-summary-card,
+    .cta-card {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .section-heading h2 {
+        font-size: clamp(1.35rem, 5vw, 1.8rem);
+    }
+
+    .vehicle-summary {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        align-items: start;
+    }
+
+    .vehicle-summary img {
+        height: 208px;
+        border-radius: 12px;
+    }
+
+    .vehicle-summary-top {
+        align-items: flex-start;
+    }
+
+    .summary-meta-row {
+        gap: 7px;
+        margin-bottom: 10px;
+    }
+
+    .summary-meta-row span {
+        min-height: 34px;
+        font-size: 0.8rem;
+    }
+
+    .summary-price strong {
+        font-size: 1.2rem;
+    }
+
+    .booking-form-grid,
+    .booking-form-grid.two-column {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .field-group label {
+        font-size: 0.84rem;
+    }
+
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+        min-height: 48px;
+        font-size: 0.95rem;
+    }
+
+    .field-group textarea {
+        min-height: 110px;
+    }
+
+    .field-group input[type="file"] {
+        min-height: 54px;
+        background: #f8fafc;
+        border-style: dashed;
+        border-color: #ced9f5;
+    }
+
+    .radio-pill-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .radio-pill {
+        min-height: 46px;
+        border-radius: 12px;
+        padding: 0 12px;
+    }
+
+    .voucher-box {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .voucher-box .btn {
+        width: 100%;
+        min-height: 46px;
+    }
+
+    .voucher-options {
+        gap: 7px;
+    }
+
+    .voucher-options span {
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .cost-list {
+        gap: 9px;
+    }
+
+    .cost-list div {
+        font-size: 0.9rem;
+    }
+
+    .total-box {
+        padding-top: 14px;
+        margin-top: 14px;
+    }
+
+    .total-box strong {
+        font-size: 1.22rem;
+    }
+
+    .cta-card {
+        position: fixed;
+        left: 14px;
+        right: 14px;
+        bottom: 10px;
+        z-index: 130;
+        border-radius: 16px;
+        box-shadow: 0 16px 34px rgba(31, 41, 55, 0.18);
+        border: 1px solid #dfe7ff;
+        padding: 10px 12px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "total total"
+            "secondary primary";
+        gap: 8px 10px;
+        align-items: center;
+    }
+
+    .mobile-total-info {
+        grid-area: total;
+        display: flex;
+        margin: 0;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .mobile-total-info span {
+        color: #64748b;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .mobile-total-info strong {
+        color: var(--primary);
+        font-family: "Montserrat", sans-serif;
+        font-size: 1.06rem;
+    }
+
+    .cta-card .btn-primary {
+        grid-area: primary;
+        width: auto;
+        min-width: 168px;
+        min-height: 44px;
+        border-radius: 12px;
+        padding: 0 14px;
+        font-size: 0.88rem;
+    }
+
+    .cta-card .btn-outline {
+        grid-area: secondary;
+        width: auto;
+        min-height: 42px;
+        border-radius: 12px;
+        padding: 0 12px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        background: #f8fafc;
+    }
+
+    .site-footer .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 46px 0 28px;
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        width: min(100% - 32px, var(--container));
+    }
+
+    body.booking-page {
+        padding-bottom: 122px;
+    }
+
+    .booking-card,
+    .vehicle-summary-card,
+    .cost-summary-card,
+    .cta-card {
+        padding: 16px;
+    }
+
+    .vehicle-summary img {
+        height: 188px;
+    }
+
+    .summary-meta-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .summary-meta-row span {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .cta-card {
+        left: 10px;
+        right: 10px;
+        bottom: 8px;
+        padding: 10px;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "total"
+            "primary"
+            "secondary";
+    }
+
+    .cta-card .btn-primary,
+    .cta-card .btn-outline {
+        width: 100%;
+        min-width: 0;
+    }
+}

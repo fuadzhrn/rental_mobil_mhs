@@ -9,7 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="{{ asset('css/detail-mobil.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/detail-mobil.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/home-mobile.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/detail-mobil-mobile.css') }}">
 </head>
 <body class="detail-page">
     @include('home.navbar')
@@ -35,6 +37,7 @@
 
     @include('home.footer')
 
-    <script src="{{ asset('js/detail-mobil.js') }}"></script>
+    <script src="{{ asset('assets/js/home-mobile.js') }}"></script>
+    <script src="{{ asset('assets/js/detail-mobil.js') }}"></script>
 </body>
 </html>

@@ -7,6 +7,121 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Dokumentasi Login Admin
+
+Dokumentasi ini menjelaskan fitur login admin untuk 2 role:
+
+- super_admin
+- admin_rental
+
+### Fitur yang tersedia
+
+- Halaman login admin pada URL /login.
+- Autentikasi berbasis session Laravel.
+- Redirect dashboard otomatis berdasarkan role:
+	- super_admin ke /super-admin/dashboard
+	- admin_rental ke /admin-rental/dashboard
+- Proteksi route dashboard menggunakan auth dan middleware role.
+- Logout yang aman (invalidate session dan regenerate token).
+
+### Akun dummy
+
+- Super Admin
+	- Email: superadmin@example.com
+	- Password: password123
+	- Role: super_admin
+- Admin Rental
+	- Email: adminrental@example.com
+	- Password: password123
+	- Role: admin_rental
+
+### Cara menjalankan
+
+1. Pastikan konfigurasi database di file .env sudah benar.
+2. Jalankan migration:
+
+```bash
+php artisan migrate
+```
+
+3. Jalankan seeder:
+
+```bash
+php artisan db:seed
+```
+
+4. Jalankan server lokal:
+
+```bash
+php artisan serve
+```
+
+5. Buka halaman login admin di browser:
+
+```text
+http://127.0.0.1:8000/login
+```
+
+### Alur login
+
+1. User membuka halaman /login.
+2. User mengisi email dan password.
+3. Sistem melakukan validasi form.
+4. Jika autentikasi gagal, user kembali ke halaman login dengan pesan error.
+5. Jika autentikasi berhasil:
+	 - role super_admin diarahkan ke dashboard super admin
+	 - role admin_rental diarahkan ke dashboard admin rental
+6. Jika role tidak dikenali, user otomatis di-logout dan dikembalikan ke login dengan pesan error.
+
+### Route utama
+
+- GET /login
+- POST /login
+- POST /logout
+- GET /super-admin/dashboard
+- GET /admin-rental/dashboard
+
+### Struktur file utama
+
+- Controller auth:
+	- app/Http/Controllers/AuthController.php
+- Dashboard controller:
+	- app/Http/Controllers/SuperAdmin/DashboardController.php
+	- app/Http/Controllers/AdminRental/DashboardController.php
+- Middleware role:
+	- app/Http/Middleware/RoleMiddleware.php
+- Routes:
+	- routes/web.php
+- View login:
+	- resources/views/auth/login.blade.php
+- Layout admin:
+	- resources/views/layouts/admin.blade.php
+- Sidebar role:
+	- resources/views/components/super-admin-sidebar.blade.php
+	- resources/views/components/admin-rental-sidebar.blade.php
+- Dashboard role:
+	- resources/views/super-admin/dashboard.blade.php
+	- resources/views/admin-rental/dashboard.blade.php
+- CSS:
+	- public/assets/css/auth.css
+	- public/assets/css/admin.css
+- Migration role user:
+	- database/migrations/2026_04_19_000003_add_role_to_users_table.php
+- Seeder akun admin:
+	- database/seeders/AdminUserSeeder.php
+
+### Troubleshooting cepat
+
+- Route login/dashboard tidak muncul:
+	- Jalankan: php artisan route:list --path=login
+	- Jalankan: php artisan route:list --path=dashboard
+- View belum berubah:
+	- Jalankan: php artisan view:clear
+- Login selalu gagal:
+	- Pastikan migration sudah menambah kolom role.
+	- Pastikan seeder sudah dijalankan.
+	- Pastikan email dan password sesuai akun dummy.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

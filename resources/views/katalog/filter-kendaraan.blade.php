@@ -1,4 +1,15 @@
-<aside class="catalog-filter" aria-label="Filter kendaraan">
+<aside class="catalog-filter" aria-label="Filter kendaraan" aria-hidden="true" hidden>
+    <div class="filter-panel-head">
+        <div>
+            <h3>Filter Kendaraan</h3>
+            <p>Saring hasil sesuai kebutuhan Anda.</p>
+        </div>
+
+        <button type="button" class="filter-close-btn" data-filter-close aria-label="Tutup filter">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
     <form class="filter-card" action="#" method="get">
         <div class="filter-block">
             <h3>Harga per Hari</h3>

@@ -1,0 +1,342 @@
+@media (max-width: 1024px) {
+    body.katalog-page {
+        min-width: 0;
+        background: var(--background);
+    }
+
+    .container {
+        width: min(100% - 56px, var(--container));
+    }
+
+    .search-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .search-heading h1 {
+        font-size: clamp(1.8rem, 6vw, 2.35rem);
+        line-height: 1.18;
+    }
+
+    .search-heading p {
+        font-size: 0.96rem;
+    }
+
+    .search-form-horizontal {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .field-group input,
+    .field-group select {
+        height: 48px;
+    }
+
+    .field-submit {
+        align-self: stretch;
+    }
+
+    .catalog-main {
+        padding: 18px 0 64px;
+    }
+
+    .catalog-layout {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .catalog-filter {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: min(88vw, 380px);
+        height: 100vh;
+        z-index: 122;
+        background: #fff;
+        box-shadow: -18px 0 40px rgba(31, 41, 55, 0.16);
+        transform: translateX(102%);
+        transition: transform 0.28s ease;
+        overflow-y: auto;
+        padding: 18px;
+        border-left: 1px solid #edf0f6;
+    }
+
+    .catalog-filter[hidden] {
+        display: block;
+    }
+
+    body.catalog-filter-open .catalog-filter {
+        transform: translateX(0);
+    }
+
+    .filter-panel-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .filter-panel-head h3 {
+        margin: 0;
+        font-family: "Montserrat", sans-serif;
+        font-size: 1.04rem;
+    }
+
+    .filter-panel-head p {
+        margin: 4px 0 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .filter-close-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text-primary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .filter-card {
+        gap: 16px;
+    }
+
+    .filter-block {
+        padding: 14px;
+        border-radius: 14px;
+        border: 1px solid #edf0f6;
+        background: #f9fbff;
+    }
+
+    .filter-block h3 {
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+    }
+
+    .filter-block label {
+        min-height: 42px;
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        font-size: 0.92rem;
+    }
+
+    .range-meta {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filter-actions {
+        gap: 10px;
+    }
+
+    .catalog-filter-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.38);
+        backdrop-filter: blur(2px);
+        z-index: 121;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    body.catalog-filter-open .catalog-filter-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .sorting-bar {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .sorting-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-toggle-btn {
+        min-height: 44px;
+        border-radius: 12px;
+        border: 1px solid #dfe7ff;
+        background: #fff;
+        color: var(--primary);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 14px;
+        font-weight: 600;
+        font-family: "Montserrat", sans-serif;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(31, 41, 55, 0.04);
+    }
+
+    .sorting-summary p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+    }
+
+    .sorting-actions {
+        width: 100%;
+    }
+
+    .sorting-actions label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+    }
+
+    .sorting-actions select {
+        width: 100%;
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 0 12px;
+        font-family: "Poppins", sans-serif;
+        background: #fff;
+    }
+
+    .availability-summary {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .availability-chip {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 16px;
+    }
+
+    .catalog-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .vehicle-card {
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .vehicle-image {
+        height: 210px;
+    }
+
+    .vehicle-body {
+        padding: 16px;
+    }
+
+    .vehicle-top {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .vehicle-top h3 {
+        font-size: 1.02rem;
+    }
+
+    .rental-name {
+        margin: 6px 0 12px;
+    }
+
+    .vehicle-spec {
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .vehicle-spec span {
+        min-height: 36px;
+        padding: 0 10px;
+        border-radius: 11px;
+        font-size: 0.84rem;
+    }
+
+    .vehicle-meta {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+    }
+
+    .vehicle-actions {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .vehicle-actions .btn {
+        min-height: 46px;
+    }
+
+    .pagination-wrap {
+        margin-top: 18px;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .page-btn,
+    .page-dots {
+        min-width: 42px;
+        min-height: 42px;
+        border-radius: 12px;
+    }
+
+    .site-footer .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 46px 0 28px;
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        width: min(100% - 32px, var(--container));
+    }
+
+    .search-card {
+        padding: 16px;
+    }
+
+    .search-heading h1 {
+        font-size: clamp(1.6rem, 7vw, 2rem);
+    }
+
+    .search-heading p {
+        font-size: 0.94rem;
+    }
+
+    .sorting-bar {
+        padding: 14px;
+    }
+
+    .catalog-filter {
+        width: min(92vw, 360px);
+        padding: 16px;
+    }
+
+    .vehicle-image {
+        height: 190px;
+    }
+
+    .availability-chip {
+        display: grid;
+        gap: 4px;
+    }
+
+    .availability-chip strong {
+        justify-self: start;
+    }
+}
