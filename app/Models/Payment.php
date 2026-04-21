@@ -33,6 +33,16 @@ class Payment extends Model
         'verified_at' => 'datetime',
     ];
 
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->payment_status) {
+            self::STATUS_UPLOADED => 'Menunggu Verifikasi',
+            self::STATUS_VERIFIED => 'Diverifikasi',
+            self::STATUS_REJECTED => 'Ditolak',
+            default => 'Belum Bayar',
+        };
+    }
+
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);

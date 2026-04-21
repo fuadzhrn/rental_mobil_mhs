@@ -20,4 +20,12 @@
         <p>Harga sewa mulai dari</p>
         <strong>Rp {{ number_format($vehicle->price_per_day, 0, ',', '.') }} <span>/ hari</span></strong>
     </div>
+
+    <div style="margin-top:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px;">
+        <p style="margin:0; font-size:13px; color:#64748b;">Rating kendaraan</p>
+        <p style="margin:6px 0 0; font-weight:700; color:#0f172a;">
+            {{ $totalReviews > 0 ? number_format($averageRating, 1) : '-' }} / 5
+            <span style="font-weight:500; color:#64748b;">({{ $totalReviews }} ulasan)</span>
+        </p>
+    </div>
 </section>

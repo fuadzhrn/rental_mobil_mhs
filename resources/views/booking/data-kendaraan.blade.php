@@ -1,3 +1,10 @@
+@php
+    $primaryImagePath = $vehicle->primaryImage?->image_path ?: $vehicle->images->first()?->image_path;
+    $vehicleImage = $vehicle->main_image
+        ? asset('storage/' . $vehicle->main_image)
+        : ($primaryImagePath ? asset('storage/' . $primaryImagePath) : null);
+@endphp
+
 <section class="booking-card vehicle-summary-card" aria-label="Data kendaraan yang dipilih">
     <div class="section-heading compact">
         <p class="eyebrow">Kendaraan Dipilih</p>
@@ -5,20 +12,27 @@
     </div>
 
     <div class="vehicle-summary">
-        <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1200&q=80" alt="BMW 320i Sport">
+        @if ($vehicleImage)
+            <img src="{{ $vehicleImage }}" alt="{{ $vehicle->name }}">
+        @else
+            <div style="width:100%; min-height:220px; display:flex; align-items:center; justify-content:center; background:#e5e7eb; color:#6b7280; border-radius:20px;">
+                No Image
+            </div>
+        @endif
+
         <div class="vehicle-summary-content">
             <div class="vehicle-summary-top">
-                <h3>BMW 320i Sport</h3>
-                <span class="status-badge available">Tersedia</span>
+                <h3>{{ $vehicle->name }}</h3>
+                <span class="status-badge available">{{ ucfirst($vehicle->status) }}</span>
             </div>
-            <p class="rental-name">Velora Signature Fleet</p>
+            <p class="rental-name">{{ $vehicle->rentalCompany?->company_name }}</p>
             <div class="summary-meta-row">
-                <span><i class="fa-solid fa-car-side"></i> Sedan Luxury</span>
-                <span><i class="fa-solid fa-location-dot"></i> Jakarta Selatan</span>
-                <span><i class="fa-solid fa-star"></i> 4.8</span>
+                <span><i class="fa-solid fa-car-side"></i> {{ $vehicle->category }}</span>
+                <span><i class="fa-solid fa-location-dot"></i> {{ $vehicle->rentalCompany?->city ?? '-' }}</span>
+                <span><i class="fa-solid fa-star"></i> Rental terverifikasi</span>
             </div>
             <div class="summary-price">
-                <strong>Rp 1.350.000</strong>
+                <strong>Rp {{ number_format($vehicle->price_per_day, 0, ',', '.') }}</strong>
                 <span>/ hari</span>
             </div>
         </div>

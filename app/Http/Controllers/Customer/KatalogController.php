@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
+use App\Models\Review;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -99,6 +101,28 @@ class KatalogController extends Controller
             abort(404);
         }
 
-        return view('detail-mobil.index', compact('vehicle'));
+        $baseReviewQuery = Review::query()
+            ->where('vehicle_id', $vehicle->id)
+            ->whereHas('booking', function ($query): void {
+                $query->where('booking_status', Booking::BOOKING_COMPLETED);
+            });
+
+        $averageRating = (clone $baseReviewQuery)->avg('rating');
+        $totalReviews = (clone $baseReviewQuery)->count();
+
+        $ratingBreakdown = [];
+        for ($star = 5; $star >= 1; $star--) {
+            $ratingBreakdown[$star] = (clone $baseReviewQuery)->where('rating', $star)->count();
+        }
+
+        $reviews = (clone $baseReviewQuery)
+            ->with('customer')
+            ->latest('id')
+            ->take(8)
+            ->get();
+
+        $averageRating = $averageRating ? round((float) $averageRating, 1) : 0;
+
+        return view('detail-mobil.index', compact('vehicle', 'reviews', 'averageRating', 'totalReviews', 'ratingBreakdown'));
     }
 }

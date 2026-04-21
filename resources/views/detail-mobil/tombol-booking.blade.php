@@ -11,7 +11,7 @@
     @php
         $bookingUrl = auth()->guest()
             ? route('login')
-            : (auth()->user()->role === 'customer' ? route('booking') : route('home'));
+            : (auth()->user()->role === 'customer' ? route('booking.create', $vehicle) : route('home'));
 
         $bookingText = auth()->guest()
             ? 'Login untuk Booking'

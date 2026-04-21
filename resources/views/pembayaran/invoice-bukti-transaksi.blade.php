@@ -5,27 +5,25 @@
     </div>
 
     <div class="invoice-list">
-        <div><span>Nomor Invoice</span><strong>INV-VLR-2026-0417</strong></div>
-        <div><span>Tanggal Transaksi</span><strong>17 Apr 2026</strong></div>
-        <div><span>Nama Penyewa</span><strong>Rendy Saputra</strong></div>
-        <div><span>Nama Kendaraan</span><strong>BMW 320i Sport</strong></div>
-        <div><span>Nama Rental</span><strong>Velora Signature Fleet</strong></div>
-        <div><span>Metode Pembayaran</span><strong>Transfer Bank BCA</strong></div>
+        <div><span>Nomor Invoice</span><strong>{{ $booking->booking_code }}</strong></div>
+        <div><span>Tanggal Transaksi</span><strong>{{ optional($payment->paid_at ?? $booking->created_at)->format('d M Y') }}</strong></div>
+        <div><span>Nama Penyewa</span><strong>{{ $booking->customer_name }}</strong></div>
+        <div><span>Nama Kendaraan</span><strong>{{ $booking->vehicle->name }}</strong></div>
+        <div><span>Nama Rental</span><strong>{{ $booking->vehicle->rentalCompany?->company_name }}</strong></div>
+        <div><span>Metode Pembayaran</span><strong>{{ $paymentMethods[$payment->payment_method]['label'] ?? $payment->payment_method }}</strong></div>
         <div>
             <span>Status Transaksi</span>
-            <strong><span class="invoice-status-chip">Menunggu Verifikasi</span></strong>
+            <strong><span class="invoice-status-chip">{{ $payment->status_label }}</span></strong>
         </div>
     </div>
 
     <div class="invoice-total">
         <span>Total Pembayaran</span>
-        <strong>Rp 3.950.000</strong>
+        <strong>Rp {{ number_format($booking->total_amount, 0, ',', '.') }}</strong>
     </div>
 
     <div class="invoice-actions">
-        <a href="{{ route('pembayaran.cetak') }}" class="btn btn-primary full-width">Cetak Bukti Pembayaran</a>
-        <a href="{{ route('pembayaran.invoice') }}" class="btn btn-outline full-width">Cetak Invoice</a>
-        <a href="{{ route('pembayaran.cetak') }}" class="btn btn-outline full-width btn-download-secondary">Download Bukti Pembayaran</a>
-        <a href="{{ route('pembayaran.invoice') }}" class="btn btn-outline full-width btn-download-secondary">Download Invoice</a>
+        <a href="{{ route('pembayaran.receipt', $booking) }}" class="btn btn-primary full-width">Lihat Bukti Transaksi</a>
+        <a href="{{ route('pembayaran.invoice', $booking) }}" class="btn btn-outline full-width">Lihat Invoice</a>
     </div>
 </section>

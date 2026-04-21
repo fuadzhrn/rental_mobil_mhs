@@ -6,59 +6,68 @@
 
     <div class="booking-form-grid two-column">
         <div class="field-group">
-            <label for="mulai-sewa">Tanggal Mulai Sewa</label>
-            <input type="date" id="mulai-sewa" value="2026-04-22">
+            <label for="pickup_date">Tanggal Mulai Sewa</label>
+            <input type="date" id="pickup_date" name="pickup_date" value="{{ old('pickup_date', $pickupDate ?? now()->addDay()->toDateString()) }}">
+            @error('pickup_date')
+                <small class="field-error">{{ $message }}</small>
+            @enderror
         </div>
 
         <div class="field-group">
-            <label for="selesai-sewa">Tanggal Selesai Sewa</label>
-            <input type="date" id="selesai-sewa" value="2026-04-24">
+            <label for="return_date">Tanggal Selesai Sewa</label>
+            <input type="date" id="return_date" name="return_date" value="{{ old('return_date', $returnDate ?? now()->addDays(2)->toDateString()) }}">
+            @error('return_date')
+                <small class="field-error">{{ $message }}</small>
+            @enderror
         </div>
 
         <div class="field-group">
-            <label for="durasi-sewa">Durasi Sewa</label>
-            <select id="durasi-sewa">
-                <option>2 Hari</option>
-                <option>3 Hari</option>
-                <option>5 Hari</option>
-                <option>7 Hari</option>
-            </select>
+            <label for="pickup_time">Jam Pengambilan</label>
+            <input type="time" id="pickup_time" name="pickup_time" value="{{ old('pickup_time', '09:00') }}">
+            @error('pickup_time')
+                <small class="field-error">{{ $message }}</small>
+            @enderror
         </div>
 
         <div class="field-group">
-            <label for="jam-pickup">Jam Pengambilan</label>
-            <input type="time" id="jam-pickup" value="09:00">
+            <label for="pickup_location">Lokasi Pengambilan</label>
+            <input type="text" id="pickup_location" name="pickup_location" value="{{ old('pickup_location') }}" placeholder="Contoh: Bandara Soekarno-Hatta / alamat lengkap">
+            @error('pickup_location')
+                <small class="field-error">{{ $message }}</small>
+            @enderror
         </div>
 
         <div class="field-group full-span">
-            <label for="pickup">Lokasi Pengambilan</label>
-            <select id="pickup">
-                <option>Cabang Jakarta Selatan</option>
-                <option>Cabang Jakarta Pusat</option>
-                <option>Bandara Soekarno-Hatta</option>
-            </select>
-        </div>
-
-        <div class="field-group full-span">
-            <label for="return">Lokasi Pengembalian</label>
-            <select id="return">
-                <option>Cabang Jakarta Selatan</option>
-                <option>Cabang Jakarta Pusat</option>
-                <option>Bandara Soekarno-Hatta</option>
-            </select>
+            <label for="return_location">Lokasi Pengembalian</label>
+            <input type="text" id="return_location" name="return_location" value="{{ old('return_location') }}" placeholder="Opsional">
+            @error('return_location')
+                <small class="field-error">{{ $message }}</small>
+            @enderror
         </div>
 
         <div class="field-group full-span">
             <label>Opsi Driver</label>
             <div class="radio-pill-group">
-                <label class="radio-pill"><input type="radio" name="driver" checked> Tanpa Sopir</label>
-                <label class="radio-pill"><input type="radio" name="driver"> Dengan Sopir</label>
+                <label class="radio-pill {{ old('with_driver', '0') == '0' ? 'is-active' : '' }}">
+                    <input type="radio" name="with_driver" value="0" {{ old('with_driver', '0') == '0' ? 'checked' : '' }}>
+                    Tanpa Sopir
+                </label>
+                <label class="radio-pill {{ old('with_driver') == '1' ? 'is-active' : '' }}">
+                    <input type="radio" name="with_driver" value="1" {{ old('with_driver') == '1' ? 'checked' : '' }}>
+                    Dengan Sopir
+                </label>
             </div>
+            @error('with_driver')
+                <small class="field-error">{{ $message }}</small>
+            @enderror
         </div>
 
         <div class="field-group full-span">
-            <label for="catatan-booking">Catatan Pemesanan</label>
-            <textarea id="catatan-booking" rows="3" placeholder="Tambahkan kebutuhan khusus jika ada."></textarea>
+            <label for="note">Catatan Pemesanan</label>
+            <textarea id="note" name="note" rows="3" placeholder="Tambahkan kebutuhan khusus jika ada.">{{ old('note') }}</textarea>
+            @error('note')
+                <small class="field-error">{{ $message }}</small>
+            @enderror
         </div>
     </div>
 </section>

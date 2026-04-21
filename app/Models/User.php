@@ -51,4 +51,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Payment::class, 'verified_by');
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'customer_id');
+    }
 }

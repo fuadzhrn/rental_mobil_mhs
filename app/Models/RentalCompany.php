@@ -50,6 +50,21 @@ class RentalCompany extends Model
         return $this->hasMany(Vehicle::class);
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function promos(): HasMany
+    {
+        return $this->hasMany(Promo::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function scopeApproved(Builder $query): Builder
     {
         return $query->where('status_verification', self::STATUS_APPROVED);

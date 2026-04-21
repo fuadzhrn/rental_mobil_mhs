@@ -8,11 +8,11 @@
         <i class="fa-solid fa-cloud-arrow-up"></i>
         <p>Tarik file ke area ini atau klik untuk memilih file</p>
         <small>Format: JPG, PNG, PDF (maks. 5MB)</small>
-        <input type="file" id="proofFile">
+        <input type="file" id="proofFile" name="proof_payment" accept=".jpg,.jpeg,.png,.pdf">
     </div>
 
     <div class="upload-meta">
         <span>File terpilih: <strong id="selectedFileName">belum ada file</strong></span>
-        <button type="button" class="btn btn-primary">Upload Bukti</button>
+        <button type="submit" class="btn btn-primary">Upload Bukti</button>
     </div>
 </section>

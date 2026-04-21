@@ -24,6 +24,38 @@ class Booking extends Model
     public const PAYMENT_VERIFIED = 'verified';
     public const PAYMENT_REJECTED = 'rejected';
 
+    public static function statusOptions(): array
+    {
+        return [
+            self::BOOKING_WAITING_PAYMENT => 'Menunggu Pembayaran',
+            self::BOOKING_WAITING_VERIFICATION => 'Menunggu Verifikasi',
+            self::BOOKING_CONFIRMED => 'Dikonfirmasi',
+            self::BOOKING_ONGOING => 'Sedang Berjalan',
+            self::BOOKING_COMPLETED => 'Selesai',
+            self::BOOKING_CANCELLED => 'Dibatalkan',
+        ];
+    }
+
+    public static function paymentStatusOptions(): array
+    {
+        return [
+            self::PAYMENT_UNPAID => 'Belum Bayar',
+            self::PAYMENT_UPLOADED => 'Uploaded',
+            self::PAYMENT_VERIFIED => 'Verified',
+            self::PAYMENT_REJECTED => 'Rejected',
+        ];
+    }
+
+    public function getBookingStatusLabelAttribute(): string
+    {
+        return self::statusOptions()[$this->booking_status] ?? ucfirst((string) $this->booking_status);
+    }
+
+    public function getPaymentStatusLabelAttribute(): string
+    {
+        return self::paymentStatusOptions()[$this->payment_status] ?? ucfirst((string) $this->payment_status);
+    }
+
     protected $fillable = [
         'booking_code',
         'customer_id',
@@ -64,6 +96,11 @@ class Booking extends Model
         'total_amount' => 'decimal:2',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'booking_code';
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
@@ -79,8 +116,18 @@ class Booking extends Model
         return $this->belongsTo(Vehicle::class);
     }
 
+    public function promo(): BelongsTo
+    {
+        return $this->belongsTo(Promo::class);
+    }
+
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
     }
 }
