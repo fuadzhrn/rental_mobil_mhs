@@ -28,9 +28,9 @@ class StoreVehicleRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'terms_conditions' => ['nullable', 'string'],
             'status' => ['required', 'in:active,inactive,maintenance'],
-            'main_image' => ['nullable', 'image', 'max:2048'],
-            'gallery_images' => ['nullable', 'array'],
-            'gallery_images.*' => ['image', 'max:2048'],
+            'main_image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:4096'],
+            'gallery_images' => ['nullable', 'array', 'max:8'],
+            'gallery_images.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:4096'],
         ];
     }
 
@@ -52,9 +52,14 @@ class StoreVehicleRequest extends FormRequest
             'price_per_day.numeric' => 'Harga per hari harus berupa angka.',
             'status.required' => 'Status kendaraan wajib diisi.',
             'status.in' => 'Status kendaraan tidak valid.',
-            'main_image.image' => 'Foto utama harus berupa gambar.',
+            'main_image.file' => 'Foto utama harus berupa file yang valid.',
+            'main_image.mimes' => 'Foto utama hanya boleh JPG, JPEG, PNG, atau WEBP.',
+            'main_image.max' => 'Ukuran foto utama maksimal 4MB.',
             'gallery_images.array' => 'Galeri harus berupa daftar gambar.',
-            'gallery_images.*.image' => 'Setiap file galeri harus berupa gambar.',
+            'gallery_images.max' => 'Maksimal 8 gambar galeri per upload.',
+            'gallery_images.*.file' => 'Setiap file galeri harus valid.',
+            'gallery_images.*.mimes' => 'Setiap gambar galeri hanya boleh JPG, JPEG, PNG, atau WEBP.',
+            'gallery_images.*.max' => 'Ukuran tiap gambar galeri maksimal 4MB.',
         ];
     }
 }

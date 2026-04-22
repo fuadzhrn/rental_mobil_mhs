@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelBookingRequest;
 use App\Models\Booking;
 use App\Models\RentalCompany;
+use App\Services\ActivityLogService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +15,12 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
+    public function __construct(
+        private readonly NotificationService $notificationService,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     public function index(Request $request): View|RedirectResponse
     {
         $rentalCompany = $this->getRentalCompany();
@@ -60,6 +68,8 @@ class BookingController extends Controller
 
     public function show(Booking $booking): View|RedirectResponse
     {
+        $this->authorize('view', $booking);
+
         $rentalCompany = $this->getRentalCompany();
 
         if (!$rentalCompany) {
@@ -76,6 +86,7 @@ class BookingController extends Controller
 
     public function markOngoing(Booking $booking): RedirectResponse
     {
+        $this->authorize('update', $booking);
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $this->ensureBookingBelongsToRental($booking, $rentalCompany->id);
 
@@ -87,11 +98,29 @@ class BookingController extends Controller
             'booking_status' => Booking::BOOKING_ONGOING,
         ]);
 
+        $this->notificationService->notifyUser(
+            userId: (int) $booking->customer_id,
+            title: 'Status Booking Berubah',
+            message: 'Booking ' . $booking->booking_code . ' sedang berjalan (ongoing).',
+            type: 'info',
+            url: route('customer.bookings.show', $booking),
+            referenceType: 'booking',
+            referenceId: $booking->id,
+        );
+
+        $this->activityLogService->log(
+            action: 'booking.marked_ongoing',
+            description: 'Admin rental mengubah booking ke ongoing: ' . $booking->booking_code,
+            targetType: 'booking',
+            targetId: $booking->id
+        );
+
         return back()->with('success', 'Booking berhasil diubah menjadi ongoing.');
     }
 
     public function markCompleted(Booking $booking): RedirectResponse
     {
+        $this->authorize('update', $booking);
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $this->ensureBookingBelongsToRental($booking, $rentalCompany->id);
 
@@ -103,11 +132,29 @@ class BookingController extends Controller
             'booking_status' => Booking::BOOKING_COMPLETED,
         ]);
 
+        $this->notificationService->notifyUser(
+            userId: (int) $booking->customer_id,
+            title: 'Booking Selesai',
+            message: 'Booking ' . $booking->booking_code . ' telah selesai. Anda bisa memberikan ulasan.',
+            type: 'success',
+            url: route('customer.bookings.show', $booking),
+            referenceType: 'booking',
+            referenceId: $booking->id,
+        );
+
+        $this->activityLogService->log(
+            action: 'booking.marked_completed',
+            description: 'Admin rental menyelesaikan booking: ' . $booking->booking_code,
+            targetType: 'booking',
+            targetId: $booking->id
+        );
+
         return back()->with('success', 'Booking berhasil diselesaikan (completed).');
     }
 
     public function cancel(CancelBookingRequest $request, Booking $booking): RedirectResponse
     {
+        $this->authorize('update', $booking);
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $this->ensureBookingBelongsToRental($booking, $rentalCompany->id);
 

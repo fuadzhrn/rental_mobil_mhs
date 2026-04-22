@@ -8,6 +8,8 @@ use App\Models\Booking;
 use App\Models\RentalCompany;
 use App\Models\Payment;
 use App\Models\Vehicle;
+use App\Services\ActivityLogService;
+use App\Services\NotificationService;
 use App\Services\PromoService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -19,12 +21,17 @@ use Illuminate\View\View;
 
 class BookingController extends Controller
 {
-    public function __construct(private readonly PromoService $promoService)
-    {
+    public function __construct(
+        private readonly PromoService $promoService,
+        private readonly NotificationService $notificationService,
+        private readonly ActivityLogService $activityLogService,
+    ) {
     }
 
     public function create(Vehicle $vehicle): View
     {
+        $this->authorize('create', Booking::class);
+
         $vehicle->load(['rentalCompany', 'images', 'primaryImage']);
         $this->ensureVehicleCanBeBooked($vehicle);
 
@@ -40,6 +47,8 @@ class BookingController extends Controller
 
     public function store(StoreBookingRequest $request, Vehicle $vehicle): RedirectResponse
     {
+        $this->authorize('create', Booking::class);
+
         $vehicle->load('rentalCompany');
         $this->ensureVehicleCanBeBooked($vehicle);
 
@@ -124,6 +133,37 @@ class BookingController extends Controller
         } catch (ValidationException $exception) {
             return back()->withInput()->withErrors($exception->errors());
         }
+
+        $this->notificationService->notifyUser(
+            userId: (int) $booking->customer_id,
+            title: 'Booking Berhasil Dibuat',
+            message: 'Booking ' . $booking->booking_code . ' berhasil dibuat. Silakan lanjutkan pembayaran.',
+            type: 'success',
+            url: route('customer.bookings.show', $booking),
+            referenceType: 'booking',
+            referenceId: $booking->id,
+        );
+
+        $rentalAdminId = $booking->rentalCompany?->user_id;
+        if ($rentalAdminId) {
+            $this->notificationService->notifyUser(
+                userId: (int) $rentalAdminId,
+                title: 'Booking Baru Masuk',
+                message: 'Ada booking baru ' . $booking->booking_code . ' dari customer.',
+                type: 'info',
+                url: route('admin-rental.bookings.show', $booking),
+                referenceType: 'booking',
+                referenceId: $booking->id,
+            );
+        }
+
+        $this->activityLogService->log(
+            action: 'booking.created',
+            description: 'Customer membuat booking baru: ' . $booking->booking_code,
+            targetType: 'booking',
+            targetId: $booking->id,
+            meta: ['vehicle_id' => $booking->vehicle_id, 'total_amount' => $booking->total_amount]
+        );
 
         return redirect()
             ->route('pembayaran.show', $booking)

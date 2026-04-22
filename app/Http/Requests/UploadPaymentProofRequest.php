@@ -16,7 +16,7 @@ class UploadPaymentProofRequest extends FormRequest
     {
         return [
             'payment_method' => ['required', 'string', Rule::in(array_keys(config('payment_methods')))],
-            'proof_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'proof_payment' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'mimetypes:image/jpeg,image/png,application/pdf', 'max:5120'],
         ];
     }
 
@@ -28,6 +28,7 @@ class UploadPaymentProofRequest extends FormRequest
             'proof_payment.required' => 'Bukti pembayaran wajib diupload.',
             'proof_payment.file' => 'Bukti pembayaran harus berupa file yang valid.',
             'proof_payment.mimes' => 'Bukti pembayaran harus berformat JPG, PNG, JPEG, atau PDF.',
+            'proof_payment.mimetypes' => 'Tipe file bukti pembayaran tidak valid.',
             'proof_payment.max' => 'Ukuran file bukti pembayaran maksimal 5MB.',
         ];
     }

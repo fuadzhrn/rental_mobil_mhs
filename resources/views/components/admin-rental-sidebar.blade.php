@@ -12,6 +12,7 @@
         <a href="{{ route('admin-rental.reviews.index') }}" class="{{ request()->routeIs('admin-rental.reviews.*') ? 'is-active' : '' }}">Data Ulasan</a>
         <a href="{{ route('admin-rental.customers.index') }}" class="{{ request()->routeIs('admin-rental.customers.*') ? 'is-active' : '' }}">Data Customer</a>
         <a href="{{ route('admin-rental.promos.index') }}" class="{{ request()->routeIs('admin-rental.promos.*') ? 'is-active' : '' }}">Promo</a>
+        <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">Notifikasi</a>
     </nav>
 
     <form action="{{ route('logout') }}" method="POST" class="sidebar-logout-form">

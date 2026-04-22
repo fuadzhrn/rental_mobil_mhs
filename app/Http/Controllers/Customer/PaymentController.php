@@ -6,17 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadPaymentProofRequest;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Services\ActivityLogService;
+use App\Services\FileUploadService;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
+    public function __construct(
+        private readonly FileUploadService $fileUploadService,
+        private readonly NotificationService $notificationService,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     public function show(Booking $booking): View
     {
+        $this->authorize('view', $booking);
         $this->ensureCustomerOwnsBooking($booking);
 
         $booking->load(['customer', 'vehicle.rentalCompany', 'vehicle.primaryImage', 'payment']);
@@ -29,8 +39,9 @@ class PaymentController extends Controller
 
     public function uploadProof(UploadPaymentProofRequest $request, Booking $booking): RedirectResponse
     {
+        $this->authorize('update', $booking);
         $this->ensureCustomerOwnsBooking($booking);
-        $booking->load('payment');
+        $booking->load(['payment', 'rentalCompany']);
         $payment = $this->ensurePaymentExists($booking);
 
         if ($payment->payment_status === Payment::STATUS_VERIFIED || $booking->payment_status === Booking::PAYMENT_VERIFIED) {
@@ -39,8 +50,13 @@ class PaymentController extends Controller
 
         $validated = $request->validated();
         $paymentMethod = $validated['payment_method'];
-        $proofPath = $request->file('proof_payment')->store('payments/proofs', 'public');
         $oldProofPath = $payment->proof_payment;
+
+        try {
+            $proofPath = $this->fileUploadService->storePublic($request->file('proof_payment'), 'payments/proofs');
+        } catch (\Throwable $exception) {
+            return back()->withInput()->with('error', 'Upload bukti pembayaran gagal. Pastikan file valid dan coba lagi.');
+        }
 
         DB::transaction(function () use ($booking, $payment, $paymentMethod, $proofPath): void {
             $payment->update([
@@ -58,8 +74,29 @@ class PaymentController extends Controller
         });
 
         if ($oldProofPath && $oldProofPath !== $proofPath) {
-            Storage::disk('public')->delete($oldProofPath);
+            $this->fileUploadService->deletePublic($oldProofPath);
         }
+
+        $rentalAdminId = $booking->rentalCompany?->user_id;
+        if ($rentalAdminId) {
+            $this->notificationService->notifyUser(
+                userId: (int) $rentalAdminId,
+                title: 'Bukti Pembayaran Baru',
+                message: 'Booking ' . $booking->booking_code . ' mengunggah bukti pembayaran baru.',
+                type: 'info',
+                url: route('admin-rental.payments.show', $booking),
+                referenceType: 'payment',
+                referenceId: (int) $payment->id,
+            );
+        }
+
+        $this->activityLogService->log(
+            action: 'payment.uploaded',
+            description: 'Customer upload bukti pembayaran untuk booking: ' . $booking->booking_code,
+            targetType: 'payment',
+            targetId: (int) $payment->id,
+            meta: ['booking_id' => $booking->id, 'payment_method' => $paymentMethod]
+        );
 
         return redirect()
             ->route('pembayaran.show', $booking)
@@ -68,6 +105,7 @@ class PaymentController extends Controller
 
     public function invoice(Booking $booking): View
     {
+        $this->authorize('view', $booking);
         $this->ensureCustomerOwnsBooking($booking);
         $booking->load(['customer', 'vehicle.rentalCompany', 'payment']);
         $payment = $this->ensurePaymentExists($booking);
@@ -83,6 +121,7 @@ class PaymentController extends Controller
 
     public function receipt(Booking $booking): View
     {
+        $this->authorize('view', $booking);
         $this->ensureCustomerOwnsBooking($booking);
         $booking->load(['customer', 'vehicle.rentalCompany', 'payment']);
         $payment = $this->ensurePaymentExists($booking);

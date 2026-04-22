@@ -25,9 +25,18 @@
                     <h1>@yield('page_title', 'Dashboard')</h1>
                 </div>
 
-                <div class="topbar-user">
-                    <strong>{{ auth()->user()->name }}</strong>
-                    <span>{{ auth()->user()->role === 'super_admin' ? 'Super Admin' : 'Admin Rental' }}</span>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <a href="{{ route('notifications.index') }}" style="text-decoration:none; color:#0f172a; font-weight:600; border:1px solid #dbe1eb; border-radius:10px; padding:8px 10px;">
+                        Notifikasi
+                        @if (($layoutUnreadNotificationsCount ?? 0) > 0)
+                            <span style="background:#ef4444; color:#fff; border-radius:999px; padding:2px 8px; font-size:12px; margin-left:6px;">{{ $layoutUnreadNotificationsCount }}</span>
+                        @endif
+                    </a>
+
+                    <div class="topbar-user">
+                        <strong>{{ auth()->user()->name }}</strong>
+                        <span>{{ auth()->user()->role === 'super_admin' ? 'Super Admin' : 'Admin Rental' }}</span>
+                    </div>
                 </div>
             </header>
 

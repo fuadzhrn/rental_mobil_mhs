@@ -13,7 +13,13 @@ use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController
 use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Customer\KatalogController;
 use App\Http\Controllers\Customer\BookingController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SuperAdmin\ActivityLogController as SuperAdminActivityLogController;
+use App\Http\Controllers\SuperAdmin\CommissionController as SuperAdminCommissionController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use App\Http\Controllers\SuperAdmin\RentalVerificationController as SuperAdminRentalVerificationController;
+use App\Http\Controllers\SuperAdmin\ReportController as SuperAdminReportController;
+use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -24,9 +30,28 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.st
 Route::middleware('auth')->group(function (): void {
 	Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-	Route::get('/super-admin/dashboard', [SuperAdminDashboardController::class, 'index'])
-		->middleware('role:super_admin')
-		->name('super-admin.dashboard');
+	Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+	Route::patch('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+	Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+
+	Route::middleware('role:super_admin')
+		->prefix('super-admin')
+		->name('super-admin.')
+		->group(function (): void {
+			Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+
+			Route::get('/rentals', [SuperAdminRentalVerificationController::class, 'index'])->name('rentals.index');
+			Route::get('/rentals/{rentalCompany}', [SuperAdminRentalVerificationController::class, 'show'])->name('rentals.show');
+			Route::patch('/rentals/{rentalCompany}/approve', [SuperAdminRentalVerificationController::class, 'approve'])->name('rentals.approve');
+			Route::patch('/rentals/{rentalCompany}/reject', [SuperAdminRentalVerificationController::class, 'reject'])->name('rentals.reject');
+
+			Route::get('/users', [SuperAdminUserController::class, 'index'])->name('users.index');
+			Route::get('/users/{user}', [SuperAdminUserController::class, 'show'])->name('users.show');
+
+			Route::get('/reports', [SuperAdminReportController::class, 'index'])->name('reports.index');
+			Route::get('/commissions', [SuperAdminCommissionController::class, 'index'])->name('commissions.index');
+			Route::get('/activity-logs', [SuperAdminActivityLogController::class, 'index'])->name('activity-logs.index');
+		});
 
 	Route::middleware('role:admin_rental')
 		->prefix('admin-rental')

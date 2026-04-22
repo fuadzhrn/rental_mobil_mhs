@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\SlugService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class RentalCompany extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $rentalCompany): void {
+            if (!$rentalCompany->company_slug && $rentalCompany->company_name) {
+                $rentalCompany->company_slug = app(SlugService::class)->generateUnique(self::class, 'company_slug', $rentalCompany->company_name);
+            }
+        });
+
+        static::updating(function (self $rentalCompany): void {
+            if ($rentalCompany->isDirty('company_name')) {
+                $rentalCompany->company_slug = app(SlugService::class)->generateUnique(self::class, 'company_slug', (string) $rentalCompany->company_name, $rentalCompany->id);
+            }
+        });
+    }
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
@@ -29,6 +45,7 @@ class RentalCompany extends Model
         'status_verification',
         'verified_by',
         'verified_at',
+        'rejection_note',
     ];
 
     protected $casts = [

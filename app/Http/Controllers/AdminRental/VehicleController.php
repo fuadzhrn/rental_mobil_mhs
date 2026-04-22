@@ -8,15 +8,23 @@ use App\Http\Requests\UpdateVehicleRequest;
 use App\Models\RentalCompany;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
+use App\Services\ActivityLogService;
+use App\Services\FileUploadService;
+use App\Services\SlugService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class VehicleController extends Controller
 {
+    public function __construct(
+        private readonly SlugService $slugService,
+        private readonly FileUploadService $fileUploadService,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     public function index(Request $request): View|RedirectResponse
     {
         $rentalCompany = $this->getRentalCompany();
@@ -49,6 +57,8 @@ class VehicleController extends Controller
 
     public function create(): View|RedirectResponse
     {
+        $this->authorize('create', Vehicle::class);
+
         $rentalCompany = $this->getRentalCompany();
 
         if (!$rentalCompany) {
@@ -66,6 +76,8 @@ class VehicleController extends Controller
 
     public function store(StoreVehicleRequest $request): RedirectResponse
     {
+        $this->authorize('create', Vehicle::class);
+
         $rentalCompany = $this->getRentalCompany();
 
         if (!$rentalCompany) {
@@ -75,11 +87,15 @@ class VehicleController extends Controller
         }
 
         $validated = $request->validated();
-        $slug = $this->generateUniqueSlug($validated['name']);
+        $slug = $this->slugService->generateUnique(Vehicle::class, 'slug', $validated['name']);
 
         $mainImagePath = null;
-        if ($request->hasFile('main_image')) {
-            $mainImagePath = $request->file('main_image')->store('vehicles/main', 'public');
+        try {
+            if ($request->hasFile('main_image')) {
+                $mainImagePath = $this->fileUploadService->storePublic($request->file('main_image'), 'vehicles/main');
+            }
+        } catch (\Throwable $exception) {
+            return back()->withInput()->with('error', 'Upload foto utama gagal. Silakan coba lagi dengan file yang valid.');
         }
 
         $vehicle = Vehicle::create([
@@ -104,6 +120,14 @@ class VehicleController extends Controller
 
         $this->storeGalleryImages($request, $vehicle);
 
+        $this->activityLogService->log(
+            action: 'vehicle.created',
+            description: 'Admin rental membuat kendaraan baru: ' . $vehicle->name,
+            targetType: 'vehicle',
+            targetId: $vehicle->id,
+            meta: ['slug' => $vehicle->slug]
+        );
+
         return redirect()
             ->route('admin-rental.vehicles.index')
             ->with('success', 'Data kendaraan berhasil ditambahkan.');
@@ -111,6 +135,8 @@ class VehicleController extends Controller
 
     public function edit(Vehicle $vehicle): View|RedirectResponse
     {
+        $this->authorize('update', $vehicle);
+
         $rentalCompany = $this->getRentalCompany();
 
         if (!$rentalCompany) {
@@ -118,8 +144,6 @@ class VehicleController extends Controller
                 ->route('admin-rental.dashboard')
                 ->with('error', 'Akun admin rental ini belum memiliki rental company. Silakan lengkapi data rental company terlebih dahulu.');
         }
-
-        $this->ensureVehicleBelongsToRental($vehicle, $rentalCompany->id);
 
         $vehicle->load('images');
 
@@ -128,6 +152,8 @@ class VehicleController extends Controller
 
     public function update(UpdateVehicleRequest $request, Vehicle $vehicle): RedirectResponse
     {
+        $this->authorize('update', $vehicle);
+
         $rentalCompany = $this->getRentalCompany();
 
         if (!$rentalCompany) {
@@ -136,18 +162,20 @@ class VehicleController extends Controller
                 ->with('error', 'Akun admin rental ini belum memiliki rental company. Silakan lengkapi data rental company terlebih dahulu.');
         }
 
-        $this->ensureVehicleBelongsToRental($vehicle, $rentalCompany->id);
-
         $validated = $request->validated();
 
-        if ($request->hasFile('main_image')) {
-            $this->deleteStoredFile($vehicle->main_image);
-            $vehicle->main_image = $request->file('main_image')->store('vehicles/main', 'public');
+        try {
+            if ($request->hasFile('main_image')) {
+                $this->fileUploadService->deletePublic($vehicle->main_image);
+                $vehicle->main_image = $this->fileUploadService->storePublic($request->file('main_image'), 'vehicles/main');
+            }
+        } catch (\Throwable $exception) {
+            return back()->withInput()->with('error', 'Upload foto utama gagal. Silakan coba lagi dengan file yang valid.');
         }
 
         $vehicle->fill([
             'name' => $validated['name'],
-            'slug' => $this->generateUniqueSlug($validated['name'], $vehicle->id),
+            'slug' => $this->slugService->generateUnique(Vehicle::class, 'slug', $validated['name'], $vehicle->id),
             'brand' => $validated['brand'],
             'type' => $validated['type'],
             'category' => $validated['category'],
@@ -168,6 +196,14 @@ class VehicleController extends Controller
         $this->storeGalleryImages($request, $vehicle);
         $this->deleteSelectedGalleryImages($request, $vehicle);
 
+        $this->activityLogService->log(
+            action: 'vehicle.updated',
+            description: 'Admin rental memperbarui kendaraan: ' . $vehicle->name,
+            targetType: 'vehicle',
+            targetId: $vehicle->id,
+            meta: ['slug' => $vehicle->slug]
+        );
+
         return redirect()
             ->route('admin-rental.vehicles.index')
             ->with('success', 'Data kendaraan berhasil diperbarui.');
@@ -175,6 +211,8 @@ class VehicleController extends Controller
 
     public function destroy(Vehicle $vehicle): RedirectResponse
     {
+        $this->authorize('delete', $vehicle);
+
         $rentalCompany = $this->getRentalCompany();
 
         if (!$rentalCompany) {
@@ -183,16 +221,23 @@ class VehicleController extends Controller
                 ->with('error', 'Akun admin rental ini belum memiliki rental company. Silakan lengkapi data rental company terlebih dahulu.');
         }
 
-        $this->ensureVehicleBelongsToRental($vehicle, $rentalCompany->id);
-
-        $this->deleteStoredFile($vehicle->main_image);
+        $this->fileUploadService->deletePublic($vehicle->main_image);
 
         foreach ($vehicle->images as $image) {
-            $this->deleteStoredFile($image->image_path);
+            $this->fileUploadService->deletePublic($image->image_path);
             $image->delete();
         }
 
+        $deletedVehicleId = $vehicle->id;
+        $deletedVehicleName = $vehicle->name;
         $vehicle->delete();
+
+        $this->activityLogService->log(
+            action: 'vehicle.deleted',
+            description: 'Admin rental menghapus kendaraan: ' . $deletedVehicleName,
+            targetType: 'vehicle',
+            targetId: $deletedVehicleId
+        );
 
         return redirect()
             ->route('admin-rental.vehicles.index')
@@ -201,18 +246,10 @@ class VehicleController extends Controller
 
     public function destroyGalleryImage(VehicleImage $image): RedirectResponse
     {
-        $rentalCompany = $this->getRentalCompany();
-
-        if (!$rentalCompany) {
-            return redirect()
-                ->route('admin-rental.dashboard')
-                ->with('error', 'Akun admin rental ini belum memiliki rental company. Silakan lengkapi data rental company terlebih dahulu.');
-        }
-
         $image->load('vehicle');
-        $this->ensureVehicleBelongsToRental($image->vehicle, $rentalCompany->id);
+        $this->authorize('update', $image->vehicle);
 
-        $this->deleteStoredFile($image->image_path);
+        $this->fileUploadService->deletePublic($image->image_path);
         $image->delete();
 
         return back()->with('success', 'Gambar galeri berhasil dihapus.');
@@ -223,40 +260,14 @@ class VehicleController extends Controller
         return Auth::user()?->rentalCompany;
     }
 
-    private function ensureVehicleBelongsToRental(Vehicle $vehicle, int $rentalCompanyId): void
-    {
-        if ((int) $vehicle->rental_company_id !== $rentalCompanyId) {
-            abort(404);
-        }
-    }
-
-    private function generateUniqueSlug(string $name, ?int $ignoreVehicleId = null): string
-    {
-        $baseSlug = Str::slug($name);
-        $slug = $baseSlug;
-        $counter = 1;
-
-        while (
-            Vehicle::query()
-                ->when($ignoreVehicleId, fn ($query) => $query->where('id', '!=', $ignoreVehicleId))
-                ->where('slug', $slug)
-                ->exists()
-        ) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-
-        return $slug;
-    }
-
     private function storeGalleryImages(StoreVehicleRequest|UpdateVehicleRequest $request, Vehicle $vehicle): void
     {
         if (!$request->hasFile('gallery_images')) {
             return;
         }
 
-        foreach ($request->file('gallery_images') as $index => $imageFile) {
-            $imagePath = $imageFile->store('vehicles/gallery', 'public');
+        foreach ($request->file('gallery_images') as $imageFile) {
+            $imagePath = $this->fileUploadService->storePublic($imageFile, 'vehicles/gallery');
 
             VehicleImage::create([
                 'vehicle_id' => $vehicle->id,
@@ -280,15 +291,8 @@ class VehicleController extends Controller
             ->get();
 
         foreach ($galleryImages as $image) {
-            $this->deleteStoredFile($image->image_path);
+            $this->fileUploadService->deletePublic($image->image_path);
             $image->delete();
-        }
-    }
-
-    private function deleteStoredFile(?string $path): void
-    {
-        if ($path && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
         }
     }
 }
