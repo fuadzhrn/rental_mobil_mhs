@@ -29,7 +29,7 @@ class ActivityLogController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $userOptions = User::query()->orderBy('name')->get(['id', 'name', 'email']);
+        $userOptions = User::query()->orderBy('name')->get(['id', 'name', 'email', 'role']);
 
         return view('super-admin.activity-logs.index', compact('activityLogs', 'userOptions'));
     }

@@ -9,7 +9,7 @@
         <a href="{{ route('super-admin.rentals.index') }}" class="{{ request()->routeIs('super-admin.rentals.*') ? 'is-active' : '' }}">Verifikasi Rental</a>
         <a href="{{ route('super-admin.users.index') }}" class="{{ request()->routeIs('super-admin.users.*') ? 'is-active' : '' }}">Semua User</a>
         <a href="{{ route('super-admin.reports.index') }}" class="{{ request()->routeIs('super-admin.reports.*') ? 'is-active' : '' }}">Laporan</a>
-        <a href="{{ route('super-admin.commissions.index') }}" class="{{ request()->routeIs('super-admin.commissions.*') ? 'is-active' : '' }}">Komisi</a>
+        <a href="{{ route('super-admin.reports.commissions') }}" class="{{ request()->routeIs('super-admin.reports.commissions') ? 'is-active' : '' }}">Komisi</a>
         <a href="{{ route('super-admin.activity-logs.index') }}" class="{{ request()->routeIs('super-admin.activity-logs.*') ? 'is-active' : '' }}">Audit Log</a>
         <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">Notifikasi</a>
     </nav>

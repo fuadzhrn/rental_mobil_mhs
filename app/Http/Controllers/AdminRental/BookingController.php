@@ -174,6 +174,24 @@ class BookingController extends Controller
                 : $booking->note,
         ]);
 
+        $this->notificationService->notifyUser(
+            userId: (int) $booking->customer_id,
+            title: 'Booking Dibatalkan',
+            message: 'Booking ' . $booking->booking_code . ' telah dibatalkan oleh admin rental.',
+            type: 'warning',
+            url: route('customer.bookings.show', $booking),
+            referenceType: 'booking',
+            referenceId: $booking->id,
+        );
+
+        $this->activityLogService->log(
+            action: 'booking.cancelled',
+            description: 'Admin rental membatalkan booking: ' . $booking->booking_code,
+            targetType: 'booking',
+            targetId: $booking->id,
+            meta: ['cancel_reason' => $request->string('cancel_reason')->toString()]
+        );
+
         return back()->with('success', 'Booking berhasil dibatalkan.');
     }
 

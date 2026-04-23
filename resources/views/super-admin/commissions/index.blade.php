@@ -6,7 +6,7 @@
 @section('content')
     <p class="page-description">Komisi dihitung dari transaksi verified dengan status booking valid (confirmed/ongoing/completed).</p>
 
-    <form method="GET" action="{{ route('super-admin.commissions.index') }}" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:16px;">
+    <form method="GET" action="{{ route('super-admin.reports.commissions') }}" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:16px;">
         <select name="rental_company_id" style="padding:10px 12px; border:1px solid #d1d5db; border-radius:10px;">
             <option value="">Semua Rental</option>
             @foreach ($rentalOptions as $rentalOption)

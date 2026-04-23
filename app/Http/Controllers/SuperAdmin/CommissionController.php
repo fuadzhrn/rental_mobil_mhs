@@ -15,6 +15,7 @@ class CommissionController extends Controller
     {
         $request->validate([
             'rental_company_id' => ['nullable', 'integer', 'exists:rental_companies,id'],
+            'booking_status' => ['nullable', 'in:confirmed,ongoing,completed'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
@@ -31,6 +32,14 @@ class CommissionController extends Controller
             ])
             ->when($request->filled('rental_company_id'), function (Builder $query) use ($request): void {
                 $query->where('rental_company_id', (int) $request->input('rental_company_id'));
+            })
+            ->when($request->filled('booking_status'), function (Builder $query) use ($request): void {
+                $statusMap = [
+                    'confirmed' => Booking::BOOKING_CONFIRMED,
+                    'ongoing' => Booking::BOOKING_ONGOING,
+                    'completed' => Booking::BOOKING_COMPLETED,
+                ];
+                $query->where('booking_status', $statusMap[$request->string('booking_status')->toString()]);
             })
             ->when($request->filled('start_date'), function (Builder $query) use ($request): void {
                 $query->whereDate('created_at', '>=', $request->string('start_date')->toString());
@@ -51,12 +60,19 @@ class CommissionController extends Controller
             ->orderBy('company_name')
             ->get(['id', 'company_name']);
 
+        $bookingStatuses = [
+            'confirmed' => 'Dikonfirmasi',
+            'ongoing' => 'Sedang Berlangsung',
+            'completed' => 'Selesai',
+        ];
+
         return view('super-admin.commissions.index', compact(
             'bookings',
             'commissionRate',
             'totalTransaction',
             'totalCommission',
-            'rentalOptions'
+            'rentalOptions',
+            'bookingStatuses'
         ));
     }
 }

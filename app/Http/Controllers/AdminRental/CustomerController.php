@@ -25,6 +25,8 @@ class CustomerController extends Controller
             return redirect()->route('admin-rental.dashboard')->with('error', 'Akun admin rental ini belum memiliki rental company.');
         }
 
+        $this->authorize('viewAny', User::class);
+
         $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'loyal' => ['nullable', 'in:loyal,non_loyal'],

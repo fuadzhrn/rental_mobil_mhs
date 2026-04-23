@@ -7,6 +7,7 @@ use App\Http\Requests\StorePromoRequest;
 use App\Http\Requests\UpdatePromoRequest;
 use App\Models\Promo;
 use App\Models\RentalCompany;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,9 @@ use Illuminate\View\View;
 
 class PromoController extends Controller
 {
+    public function __construct(
+        private readonly ActivityLogService $activityLogService,
+    ) {}
     public function index(Request $request): View|RedirectResponse
     {
         $rentalCompany = $this->getRentalCompany();
@@ -54,6 +58,8 @@ class PromoController extends Controller
             return redirect()->route('admin-rental.dashboard')->with('error', 'Akun admin rental ini belum memiliki rental company.');
         }
 
+        $this->authorize('create', Promo::class);
+
         $promo = new Promo([
             'discount_type' => Promo::DISCOUNT_PERCENT,
             'status' => Promo::STATUS_ACTIVE,
@@ -66,10 +72,11 @@ class PromoController extends Controller
 
     public function store(StorePromoRequest $request): RedirectResponse
     {
+        $this->authorize('create', Promo::class);
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $validated = $request->validated();
 
-        Promo::create([
+        $promo = Promo::create([
             'rental_company_id' => $rentalCompany->id,
             'title' => $validated['title'],
             'promo_code' => strtoupper($validated['promo_code']),
@@ -85,6 +92,14 @@ class PromoController extends Controller
             'status' => $validated['status'],
         ]);
 
+        $this->activityLogService->log(
+            action: 'promo.created',
+            description: 'Admin rental membuat promo: ' . $validated['title'],
+            targetType: 'promo',
+            targetId: $promo->id,
+            meta: ['promo_code' => $promo->promo_code, 'discount_value' => $promo->discount_value]
+        );
+
         return redirect()->route('admin-rental.promos.index')->with('success', 'Promo berhasil ditambahkan.');
     }
 
@@ -92,12 +107,14 @@ class PromoController extends Controller
     {
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $this->ensurePromoBelongsToRental($promo, $rentalCompany->id);
+        $this->authorize('update', $promo);
 
         return view('admin-rental.promos.edit', compact('promo', 'rentalCompany'));
     }
 
     public function update(UpdatePromoRequest $request, Promo $promo): RedirectResponse
     {
+        $this->authorize('update', $promo);
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $this->ensurePromoBelongsToRental($promo, $rentalCompany->id);
 
@@ -117,27 +134,59 @@ class PromoController extends Controller
             'status' => $validated['status'],
         ]);
 
+        $this->activityLogService->log(
+            action: 'promo.updated',
+            description: 'Admin rental memperbarui promo: ' . $validated['title'],
+            targetType: 'promo',
+            targetId: $promo->id,
+            meta: ['promo_code' => $promo->promo_code, 'discount_value' => $promo->discount_value]
+        );
+
         return redirect()->route('admin-rental.promos.index')->with('success', 'Promo berhasil diperbarui.');
     }
 
     public function destroy(Promo $promo): RedirectResponse
     {
+        $this->authorize('delete', $promo);
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $this->ensurePromoBelongsToRental($promo, $rentalCompany->id);
 
+        $promoCode = $promo->promo_code;
+        $promoId = $promo->id;
+
         $promo->delete();
+
+        $this->activityLogService->log(
+            action: 'promo.deleted',
+            description: 'Admin rental menghapus promo: ' . $promoCode,
+            targetType: 'promo',
+            targetId: $promoId,
+            meta: ['promo_code' => $promoCode]
+        );
 
         return redirect()->route('admin-rental.promos.index')->with('success', 'Promo berhasil dihapus.');
     }
 
     public function toggle(Promo $promo): RedirectResponse
     {
+        $this->authorize('update', $promo);
         $rentalCompany = $this->getRentalCompanyOrAbort();
         $this->ensurePromoBelongsToRental($promo, $rentalCompany->id);
 
+        $oldStatus = $promo->status;
+        $newStatus = $promo->status === Promo::STATUS_ACTIVE ? Promo::STATUS_INACTIVE : Promo::STATUS_ACTIVE;
+
         $promo->update([
-            'status' => $promo->status === Promo::STATUS_ACTIVE ? Promo::STATUS_INACTIVE : Promo::STATUS_ACTIVE,
+            'status' => $newStatus,
         ]);
+
+        $this->activityLogService->log(
+            action: 'promo.toggled',
+            description: 'Admin rental mengubah status promo: ' . $promo->promo_code . ' dari ' . $oldStatus . ' ke ' . $newStatus,
+            targetType: 'promo',
+            targetId: $promo->id,
+            meta: ['old_status' => $oldStatus, 'new_status' => $newStatus]
+        );
 
         return back()->with('success', 'Status promo berhasil diperbarui.');
     }

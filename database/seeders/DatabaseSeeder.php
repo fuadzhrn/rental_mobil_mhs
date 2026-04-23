@@ -16,6 +16,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminUserSeeder::class,
+            RentalCompanySeeder::class,
+            VehicleSeeder::class,
+            PromoSeeder::class,
+            BookingSeeder::class,
+            PaymentSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }

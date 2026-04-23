@@ -21,6 +21,8 @@ class ReviewController extends Controller
                 ->with('error', 'Akun admin rental ini belum memiliki rental company.');
         }
 
+        $this->authorize('viewAny', Review::class);
+
         $reviews = Review::query()
             ->with(['vehicle', 'customer', 'booking'])
             ->where('rental_company_id', $rentalCompany->id)

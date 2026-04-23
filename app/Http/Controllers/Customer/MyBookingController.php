@@ -12,6 +12,8 @@ class MyBookingController extends Controller
 {
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Booking::class);
+
         $request->validate([
             'booking_status' => ['nullable', 'in:waiting_payment,waiting_verification,confirmed,ongoing,completed,cancelled'],
             'payment_status' => ['nullable', 'in:unpaid,uploaded,verified,rejected'],
@@ -48,7 +50,7 @@ class MyBookingController extends Controller
 
     public function show(Booking $booking): View
     {
-        $this->ensureBookingOwnership($booking);
+        $this->authorize('view', $booking);
 
         $booking->load(['vehicle.rentalCompany', 'vehicle.primaryImage', 'customer', 'payment', 'review']);
 

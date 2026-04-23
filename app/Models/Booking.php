@@ -56,6 +56,16 @@ class Booking extends Model
         return self::paymentStatusOptions()[$this->payment_status] ?? ucfirst((string) $this->payment_status);
     }
 
+    public function bookingStatusLabel(): string
+    {
+        return $this->booking_status_label;
+    }
+
+    public function paymentStatusLabel(): string
+    {
+        return $this->payment_status_label;
+    }
+
     protected $fillable = [
         'booking_code',
         'customer_id',

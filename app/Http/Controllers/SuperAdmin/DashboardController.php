@@ -40,7 +40,7 @@ class DashboardController extends Controller
             ['label' => 'Verifikasi Rental', 'route' => route('super-admin.rentals.index')],
             ['label' => 'Semua User', 'route' => route('super-admin.users.index')],
             ['label' => 'Laporan', 'route' => route('super-admin.reports.index')],
-            ['label' => 'Komisi', 'route' => route('super-admin.commissions.index')],
+                ['label' => 'Komisi', 'route' => route('super-admin.reports.commissions')],
         ];
 
         return view('super-admin.dashboard', compact('summary', 'quickLinks', 'commissionRate'));

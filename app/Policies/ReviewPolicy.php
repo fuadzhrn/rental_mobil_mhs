@@ -8,6 +8,11 @@ use App\Models\User;
 
 class ReviewPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return in_array($user->role, ['super_admin', 'admin_rental'], true);
+    }
+
     public function view(User $user, Review $review): bool
     {
         if ($user->role === 'super_admin') {

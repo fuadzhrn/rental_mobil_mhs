@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminRental\CustomerController as AdminRentalCustomerCo
 use App\Http\Controllers\AdminRental\PaymentController as AdminRentalPaymentController;
 use App\Http\Controllers\AdminRental\ReviewController as AdminRentalReviewController;
 use App\Http\Controllers\AdminRental\PromoController as AdminRentalPromoController;
+use App\Http\Controllers\AdminRental\ReportController as AdminRentalReportController;
 use App\Http\Controllers\AdminRental\VehicleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Customer\MyBookingController;
@@ -49,7 +50,13 @@ Route::middleware('auth')->group(function (): void {
 			Route::get('/users/{user}', [SuperAdminUserController::class, 'show'])->name('users.show');
 
 			Route::get('/reports', [SuperAdminReportController::class, 'index'])->name('reports.index');
-			Route::get('/commissions', [SuperAdminCommissionController::class, 'index'])->name('commissions.index');
+			Route::get('/reports/bookings', [SuperAdminReportController::class, 'bookings'])->name('reports.bookings');
+			Route::get('/reports/payments', [SuperAdminReportController::class, 'payments'])->name('reports.payments');
+			Route::get('/reports/top-vehicles', [SuperAdminReportController::class, 'topVehicles'])->name('reports.top-vehicles');
+			Route::get('/reports/active-customers', [SuperAdminReportController::class, 'activeCustomers'])->name('reports.active-customers');
+			Route::get('/reports/revenue', [SuperAdminReportController::class, 'revenue'])->name('reports.revenue');
+			Route::get('/reports/commissions', [SuperAdminReportController::class, 'commissions'])->name('reports.commissions');
+			Route::get('/commissions', [SuperAdminReportController::class, 'commissions'])->name('commissions.index');
 			Route::get('/activity-logs', [SuperAdminActivityLogController::class, 'index'])->name('activity-logs.index');
 		});
 
@@ -127,4 +134,11 @@ Route::middleware(['auth', 'role:admin_rental'])
 		Route::get('/payments/{booking:booking_code}', [AdminRentalPaymentController::class, 'show'])->name('payments.show');
 		Route::patch('/payments/{booking:booking_code}/verify', [AdminRentalPaymentController::class, 'verify'])->name('payments.verify');
 		Route::patch('/payments/{booking:booking_code}/reject', [AdminRentalPaymentController::class, 'reject'])->name('payments.reject');
+
+		Route::get('/reports', [AdminRentalReportController::class, 'index'])->name('reports.index');
+		Route::get('/reports/bookings', [AdminRentalReportController::class, 'bookings'])->name('reports.bookings');
+		Route::get('/reports/payments', [AdminRentalReportController::class, 'payments'])->name('reports.payments');
+		Route::get('/reports/top-vehicles', [AdminRentalReportController::class, 'topVehicles'])->name('reports.top-vehicles');
+		Route::get('/reports/active-customers', [AdminRentalReportController::class, 'activeCustomers'])->name('reports.active-customers');
+		Route::get('/reports/revenue', [AdminRentalReportController::class, 'revenue'])->name('reports.revenue');
 	});

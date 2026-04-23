@@ -1,86 +1,189 @@
 @extends('layouts.admin')
 
-@section('title', 'Laporan Platform')
-@section('page_title', 'Laporan Platform')
+@section('title', 'Laporan Ringkas - Super Admin')
 
 @section('content')
-    <p class="page-description">Ringkasan metrik lintas platform untuk monitoring operasional dan pendapatan.</p>
-
-    <form method="GET" action="{{ route('super-admin.reports.index') }}" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; margin-bottom:18px;">
-        <input type="date" name="start_date" value="{{ request('start_date') }}" style="padding:10px 12px; border:1px solid #d1d5db; border-radius:10px;">
-        <input type="date" name="end_date" value="{{ request('end_date') }}" style="padding:10px 12px; border:1px solid #d1d5db; border-radius:10px;">
-        <button type="submit" style="padding:10px 12px; border:0; border-radius:10px; background:#0f172a; color:#fff; font-weight:600;">Terapkan Filter</button>
-    </form>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:16px;">
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Total Rental</small><h4 style="margin:6px 0 0;">{{ $stats['total_rentals'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Rental Approved</small><h4 style="margin:6px 0 0;">{{ $stats['total_rentals_approved'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Rental Pending</small><h4 style="margin:6px 0 0;">{{ $stats['total_rentals_pending'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Total Customer</small><h4 style="margin:6px 0 0;">{{ $stats['total_customers'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Admin Rental</small><h4 style="margin:6px 0 0;">{{ $stats['total_admin_rental'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Total Kendaraan</small><h4 style="margin:6px 0 0;">{{ $stats['total_vehicles'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Total Booking</small><h4 style="margin:6px 0 0;">{{ $stats['total_bookings'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Booking Selesai</small><h4 style="margin:6px 0 0;">{{ $stats['total_bookings_completed'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Payment Verified</small><h4 style="margin:6px 0 0;">{{ $stats['total_payment_verified'] }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Revenue Verified</small><h4 style="margin:6px 0 0;">Rp {{ number_format($stats['total_transaction_revenue'], 0, ',', '.') }}</h4></article>
-        <article style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;"><small style="color:#64748b;">Komisi ({{ $stats['commission_rate'] }}%)</small><h4 style="margin:6px 0 0;">Rp {{ number_format($stats['total_commission'], 0, ',', '.') }}</h4></article>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0">📊 Laporan Ringkas Platform</h1>
+            <p class="text-muted small mt-2">Dashboard overview dan akses cepat ke laporan detail</p>
+        </div>
     </div>
 
-    <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:12px; align-items:start;">
-        <section style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px; overflow:auto;">
-            <h4 style="margin:0 0 10px;">10 Transaksi Verified Terbaru</h4>
-            <table style="width:100%; border-collapse:collapse; min-width:680px;">
-                <thead>
-                    <tr style="background:#f8fafc;">
-                        <th style="text-align:left; padding:10px;">Booking</th>
-                        <th style="text-align:left; padding:10px;">Rental</th>
-                        <th style="text-align:left; padding:10px;">Customer</th>
-                        <th style="text-align:left; padding:10px;">Kendaraan</th>
-                        <th style="text-align:left; padding:10px;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($latestTransactions as $item)
-                        <tr style="border-top:1px solid #e5e7eb;">
-                            <td style="padding:10px;">{{ $item->booking_code }}</td>
-                            <td style="padding:10px;">{{ $item->rentalCompany?->company_name ?? '-' }}</td>
-                            <td style="padding:10px;">{{ $item->customer_name ?: ($item->customer?->name ?? '-') }}</td>
-                            <td style="padding:10px;">{{ $item->vehicle?->name ?? '-' }}</td>
-                            <td style="padding:10px; font-weight:700;">Rp {{ number_format($item->total_amount, 0, ',', '.') }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="5" style="padding:14px; text-align:center; color:#6b7280;">Belum ada data transaksi verified.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </section>
-
-        <section style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;">
-            <h4 style="margin:0 0 10px;">Top Rental by Booking</h4>
-            <ol style="margin:0; padding-left:18px; display:grid; gap:8px;">
-                @forelse ($topRentals as $rental)
-                    <li>
-                        <strong>{{ $rental->company_name }}</strong><br>
-                        <small style="color:#64748b;">{{ $rental->total_bookings }} booking</small>
-                    </li>
-                @empty
-                    <li style="color:#6b7280;">Belum ada data.</li>
-                @endforelse
-            </ol>
-        </section>
-
-        <section style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px;">
-            <h4 style="margin:0 0 10px;">Top Kendaraan by Booking</h4>
-            <ol style="margin:0; padding-left:18px; display:grid; gap:8px;">
-                @forelse ($topVehicles as $vehicle)
-                    <li>
-                        <strong>{{ $vehicle->name }}</strong><br>
-                        <small style="color:#64748b;">{{ $vehicle->total_bookings }} booking</small>
-                    </li>
-                @empty
-                    <li style="color:#6b7280;">Belum ada data.</li>
-                @endforelse
-            </ol>
-        </section>
+    <!-- Filter Tanggal -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label small">Tanggal Mulai</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control form-control-sm" 
+                        value="{{ request('start_date') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label small">Tanggal Akhir</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control form-control-sm" 
+                        value="{{ request('end_date') }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <a href="{{ route('super-admin.reports.index') }}" class="btn btn-secondary btn-sm w-100">Reset</a>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Booking -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="text-muted small mb-1">Total Booking</p>
+                            <h3 class="mb-0">{{ $totalBookings }}</h3>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-primary" style="font-size: 24px;">📦</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Verified -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="text-muted small mb-1">Pembayaran Terverifikasi</p>
+                            <h3 class="mb-0">{{ $totalPaymentsVerified }}</h3>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-success" style="font-size: 24px;">✓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Vehicles -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="text-muted small mb-1">Total Kendaraan</p>
+                            <h3 class="mb-0">{{ $totalVehicles }}</h3>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-info" style="font-size: 24px;">🚗</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="text-muted small mb-1">Total Pendapatan</p>
+                            <h3 class="mb-0">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-warning" style="font-size: 24px;">💰</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Commission -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="text-muted small mb-1">Total Komisi (10%)</p>
+                            <h3 class="mb-0">Rp {{ number_format($totalCommission, 0, ',', '.') }}</h3>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-danger" style="font-size: 24px;">📈</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Active Customers -->
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="text-muted small mb-1">Customer Aktif</p>
+                            <h3 class="mb-0">{{ $totalActiveCustomers }}</h3>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-secondary" style="font-size: 24px;">👥</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links Section -->
+    <div class="row">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">⚡ Akses Cepat ke Laporan</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <a href="{{ route('super-admin.reports.bookings') }}" class="btn btn-outline-primary w-100">
+                                📋 Laporan Booking
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ route('super-admin.reports.payments') }}" class="btn btn-outline-success w-100">
+                                💳 Laporan Pembayaran
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ route('super-admin.reports.top-vehicles') }}" class="btn btn-outline-info w-100">
+                                🏆 Kendaraan Terlaris
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ route('super-admin.reports.active-customers') }}" class="btn btn-outline-warning w-100">
+                                ⭐ Customer Aktif
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ route('super-admin.reports.revenue') }}" class="btn btn-outline-danger w-100">
+                                💵 Pendapatan Rental
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ route('super-admin.reports.commissions') }}" class="btn btn-outline-secondary w-100">
+                                🔢 Komisi Platform
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

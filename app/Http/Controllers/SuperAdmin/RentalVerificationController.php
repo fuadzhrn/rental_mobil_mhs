@@ -5,6 +5,8 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectRentalRequest;
 use App\Models\RentalCompany;
+use App\Services\ActivityLogService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +14,10 @@ use Illuminate\View\View;
 
 class RentalVerificationController extends Controller
 {
+    public function __construct(
+        private readonly NotificationService $notificationService,
+        private readonly ActivityLogService $activityLogService,
+    ) {}
     public function index(Request $request): View
     {
         $request->validate([
@@ -76,6 +82,24 @@ class RentalVerificationController extends Controller
             'rejection_note' => null,
         ]);
 
+        $this->notificationService->notifyUser(
+            userId: (int) $rentalCompany->user_id,
+            title: 'Pendaftaran Rental Disetujui',
+            message: 'Pendaftaran rental "' . $rentalCompany->company_name . '" telah disetujui oleh admin super. Anda sekarang bisa mengelola kendaraan.',
+            type: 'success',
+            url: route('admin-rental.dashboard'),
+            referenceType: 'rental_company',
+            referenceId: $rentalCompany->id,
+        );
+
+        $this->activityLogService->log(
+            action: 'rental.approved',
+            description: 'Super admin menyetujui pendaftaran rental: ' . $rentalCompany->company_name,
+            targetType: 'rental_company',
+            targetId: $rentalCompany->id,
+            meta: ['company_name' => $rentalCompany->company_name, 'city' => $rentalCompany->city]
+        );
+
         return back()->with('success', 'Rental berhasil disetujui.');
     }
 
@@ -88,12 +112,32 @@ class RentalVerificationController extends Controller
             return back()->with('error', 'Rental ini tidak berada pada status yang dapat ditolak.');
         }
 
+        $validated = $request->validated();
+
         $rentalCompany->update([
             'status_verification' => RentalCompany::STATUS_REJECTED,
             'verified_by' => Auth::id(),
             'verified_at' => now(),
-            'rejection_note' => $request->string('rejection_note')->toString(),
+            'rejection_note' => $validated['rejection_note'],
         ]);
+
+        $this->notificationService->notifyUser(
+            userId: (int) $rentalCompany->user_id,
+            title: 'Pendaftaran Rental Ditolak',
+            message: 'Pendaftaran rental "' . $rentalCompany->company_name . '" ditolak oleh admin super. Alasan: ' . $validated['rejection_note'],
+            type: 'error',
+            url: route('admin-rental.dashboard'),
+            referenceType: 'rental_company',
+            referenceId: $rentalCompany->id,
+        );
+
+        $this->activityLogService->log(
+            action: 'rental.rejected',
+            description: 'Super admin menolak pendaftaran rental: ' . $rentalCompany->company_name,
+            targetType: 'rental_company',
+            targetId: $rentalCompany->id,
+            meta: ['company_name' => $rentalCompany->company_name, 'rejection_note' => $validated['rejection_note']]
+        );
 
         return back()->with('success', 'Rental berhasil ditolak.');
     }
