@@ -7,26 +7,27 @@
         </div>
 
         <div class="promo-grid">
-            <article class="promo-card">
-                <p class="promo-label">Weekend Deal</p>
-                <h3>Diskon 20% Akhir Pekan</h3>
-                <p>Sewa kendaraan setiap Jumat-Minggu dan nikmati potongan harga hingga 20%.</p>
-                <a href="#" class="promo-link">Klaim Promo <i class="fa-solid fa-arrow-right"></i></a>
-            </article>
-
-            <article class="promo-card">
-                <p class="promo-label">New Member</p>
-                <h3>Voucher Rp100.000 Member Baru</h3>
-                <p>Dapatkan voucher spesial saat pertama kali melakukan booking di VeloraRide.</p>
-                <a href="#" class="promo-link">Daftar Sekarang <i class="fa-solid fa-arrow-right"></i></a>
-            </article>
-
-            <article class="promo-card">
-                <p class="promo-label">Long Rent</p>
-                <h3>Potongan 15% Sewa 3 Hari+</h3>
-                <p>Semakin lama durasi sewa, semakin hemat biaya perjalanan Anda.</p>
-                <a href="#" class="promo-link">Lihat Syarat <i class="fa-solid fa-arrow-right"></i></a>
-            </article>
+            @forelse($promos as $promo)
+                <article class="promo-card">
+                    <p class="promo-label">{{ $promo->promo_code }}</p>
+                    <h3>{{ $promo->title }}</h3>
+                    <p>
+                        @if($promo->discount_type === 'percent')
+                            Dapatkan diskon {{ $promo->discount_value }}% untuk setiap transaksi.
+                        @else
+                            Dapatkan potongan Rp {{ number_format($promo->discount_value, 0, ',', '.') }} untuk setiap transaksi.
+                        @endif
+                    </p>
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                        Berlaku s/d {{ \Carbon\Carbon::parse($promo->end_date)->format('d M Y') }}
+                    </div>
+                    <a href="#" class="promo-link" data-promo="{{ $promo->promo_code }}">
+                        Klaim Promo <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </article>
+            @empty
+                <p style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">Tidak ada promo aktif saat ini. Pantau terus untuk penawaran menarik!</p>
+            @endforelse
         </div>
     </div>
 </section>

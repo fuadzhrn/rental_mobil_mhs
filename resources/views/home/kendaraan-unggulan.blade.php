@@ -7,57 +7,31 @@
         </div>
 
         <div class="vehicle-grid">
-            <article class="vehicle-card">
-                <img src="https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=1000&q=80" alt="Toyota Raize" class="vehicle-image">
-                <div class="vehicle-body">
-                    <h3>Toyota Raize 1.0 Turbo</h3>
-                    <p class="vehicle-type">SUV Compact</p>
-                    <div class="vehicle-meta">
-                        <strong>Rp 525.000 <span>/ hari</span></strong>
-                        <span class="rating"><i class="fa-solid fa-star"></i> 4.8</span>
+            @forelse($featuredVehicles as $vehicle)
+                <article class="vehicle-card">
+                    @if($vehicle->main_image)
+                        <img src="{{ asset('storage/' . $vehicle->main_image) }}" alt="{{ $vehicle->name }}" class="vehicle-image">
+                    @elseif($vehicle->primaryImage)
+                        <img src="{{ asset('storage/' . $vehicle->primaryImage->image_path) }}" alt="{{ $vehicle->name }}" class="vehicle-image">
+                    @else
+                        <img src="https://via.placeholder.com/1000x600?text={{ urlencode($vehicle->name) }}" alt="{{ $vehicle->name }}" class="vehicle-image">
+                    @endif
+                    <div class="vehicle-body">
+                        <h3>{{ $vehicle->name }}</h3>
+                        <p class="vehicle-type">{{ $vehicle->category }}</p>
+                        <div class="vehicle-meta">
+                            <strong>Rp {{ number_format($vehicle->price_per_day, 0, ',', '.') }} <span>/ hari</span></strong>
+                            <span class="rating">
+                                <i class="fa-solid fa-star"></i> 
+                                {{ $vehicle->reviews_avg_rating ? number_format($vehicle->reviews_avg_rating, 1) : 'N/A' }}
+                            </span>
+                        </div>
+                        <a href="{{ route('katalog.show', $vehicle->slug) }}" class="btn btn-outline full-width">Lihat Detail</a>
                     </div>
-                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
-                </div>
-            </article>
-
-            <article class="vehicle-card">
-                <img src="https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=1000&q=80" alt="Honda Brio" class="vehicle-image">
-                <div class="vehicle-body">
-                    <h3>Honda Brio RS CVT</h3>
-                    <p class="vehicle-type">City Car</p>
-                    <div class="vehicle-meta">
-                        <strong>Rp 385.000 <span>/ hari</span></strong>
-                        <span class="rating"><i class="fa-solid fa-star"></i> 4.7</span>
-                    </div>
-                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
-                </div>
-            </article>
-
-            <article class="vehicle-card">
-                <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1000&q=80" alt="Mitsubishi Xpander" class="vehicle-image">
-                <div class="vehicle-body">
-                    <h3>Mitsubishi Xpander</h3>
-                    <p class="vehicle-type">MPV</p>
-                    <div class="vehicle-meta">
-                        <strong>Rp 475.000 <span>/ hari</span></strong>
-                        <span class="rating"><i class="fa-solid fa-star"></i> 4.9</span>
-                    </div>
-                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
-                </div>
-            </article>
-
-            <article class="vehicle-card">
-                <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1000&q=80" alt="BMW 320i" class="vehicle-image">
-                <div class="vehicle-body">
-                    <h3>BMW 320i Sport</h3>
-                    <p class="vehicle-type">Sedan Luxury</p>
-                    <div class="vehicle-meta">
-                        <strong>Rp 1.350.000 <span>/ hari</span></strong>
-                        <span class="rating"><i class="fa-solid fa-star"></i> 4.9</span>
-                    </div>
-                    <a href="{{ route('katalog.index') }}" class="btn btn-outline full-width">Lihat Detail</a>
-                </div>
-            </article>
+                </article>
+            @empty
+                <p style="grid-column: 1 / -1; text-align: center; padding: 40px 0;">Tidak ada kendaraan unggulan saat ini.</p>
+            @endforelse
         </div>
     </div>
 </section>

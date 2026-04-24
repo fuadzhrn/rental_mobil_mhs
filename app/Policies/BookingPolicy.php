@@ -7,6 +7,11 @@ use App\Models\User;
 
 class BookingPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return $user->role === 'customer';
+    }
+
     public function view(User $user, Booking $booking): bool
     {
         if ($user->role === 'super_admin') {

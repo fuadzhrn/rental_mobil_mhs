@@ -42,6 +42,7 @@ class RentalCompany extends Model
         'phone',
         'email',
         'logo',
+        'document',
         'status_verification',
         'verified_by',
         'verified_at',

@@ -182,7 +182,11 @@ class ReportController extends Controller
                         ->when($dateFilter['end'], fn($q) => $q->where('created_at', '<=', $dateFilter['end']));
                 },
             ], 'total_amount')
-            ->having('verified_booking_count', '>', 0)
+            ->whereHas('bookings', function (Builder $query) use ($dateFilter): void {
+                $query->where('payment_status', Booking::PAYMENT_VERIFIED)
+                    ->when($dateFilter['start'], fn($q) => $q->where('created_at', '>=', $dateFilter['start']))
+                    ->when($dateFilter['end'], fn($q) => $q->where('created_at', '<=', $dateFilter['end']));
+            })
             ->orderByDesc('verified_booking_count')
             ->limit($limit)
             ->get();
@@ -231,7 +235,11 @@ class ReportController extends Controller
                         ->when($dateFilter['end'], fn($q) => $q->where('created_at', '<=', $dateFilter['end']));
                 },
             ], 'total_amount')
-            ->having('completed_booking_count', '>', 0)
+            ->whereHas('bookings', function (Builder $query) use ($dateFilter): void {
+                $query->where('booking_status', Booking::BOOKING_COMPLETED)
+                    ->when($dateFilter['start'], fn($q) => $q->where('created_at', '>=', $dateFilter['start']))
+                    ->when($dateFilter['end'], fn($q) => $q->where('created_at', '<=', $dateFilter['end']));
+            })
             ->orderByDesc('completed_booking_count')
             ->limit($limit)
             ->get();
@@ -272,7 +280,11 @@ class ReportController extends Controller
                 },
             ], 'total_amount')
             ->where('status_verification', RentalCompany::STATUS_APPROVED)
-            ->having('verified_booking_count', '>', 0)
+            ->whereHas('bookings', function (Builder $query) use ($dateFilter): void {
+                $query->where('payment_status', Booking::PAYMENT_VERIFIED)
+                    ->when($dateFilter['start'], fn($q) => $q->where('created_at', '>=', $dateFilter['start']))
+                    ->when($dateFilter['end'], fn($q) => $q->where('created_at', '<=', $dateFilter['end']));
+            })
             ->orderByDesc('total_revenue')
             ->get();
 
@@ -313,9 +325,13 @@ class ReportController extends Controller
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'rental_id' => ['nullable', 'exists:rental_companies,id'],
+            'rental_company_id' => ['nullable', 'exists:rental_companies,id'],
+            'payment_status' => ['nullable', 'in:unpaid,uploaded,verified,rejected'],
+            'booking_status' => ['nullable', 'in:waiting_payment,waiting_verification,confirmed,ongoing,completed,cancelled'],
         ]);
 
         $dateFilter = $this->getDateFilter($request);
+        $selectedRentalId = $request->integer('rental_company_id') ?: $request->integer('rental_id');
 
         // Commission dari transaksi verified
         $baseQuery = Booking::query()
@@ -323,7 +339,9 @@ class ReportController extends Controller
             ->where('payment_status', Booking::PAYMENT_VERIFIED)
             ->when($dateFilter['start'], fn($q) => $q->where('created_at', '>=', $dateFilter['start']))
             ->when($dateFilter['end'], fn($q) => $q->where('created_at', '<=', $dateFilter['end']))
-            ->when($request->filled('rental_id'), fn($q) => $q->where('rental_company_id', $request->integer('rental_id')));
+            ->when($selectedRentalId, fn($q) => $q->where('rental_company_id', $selectedRentalId))
+            ->when($request->filled('payment_status'), fn($q) => $q->where('payment_status', $request->string('payment_status')))
+            ->when($request->filled('booking_status'), fn($q) => $q->where('booking_status', $request->string('booking_status')));
 
         // Summary
         $summary = [
@@ -348,11 +366,14 @@ class ReportController extends Controller
 
         $rentalCompanies = RentalCompany::orderBy('company_name')->get(['id', 'company_name']);
 
-        return view('super-admin.reports.commissions', compact(
-            'commissions',
-            'summary',
-            'rentalCompanies'
-        ));
+        return view('super-admin.commissions.index', [
+            'bookings' => $commissions,
+            'commissionRate' => $this->commissionRate,
+            'totalTransaction' => $summary['total_gross_revenue'],
+            'totalCommission' => $summary['total_commission'],
+            'rentalOptions' => $rentalCompanies,
+            'bookingStatuses' => Booking::statusOptions(),
+        ]);
     }
 
     /**

@@ -13,7 +13,23 @@
         </nav>
 
         <div class="header-actions desktop-actions">
-            <a href="{{ route('login') }}" class="auth-link">Login / Daftar</a>
+            @auth
+                @if (auth()->user()->role === 'customer')
+                    <a href="{{ route('customer.bookings.index') }}" class="auth-link">My Booking</a>
+                @elseif (auth()->user()->role === 'super_admin')
+                    <a href="{{ route('super-admin.dashboard') }}" class="auth-link">Dashboard Admin</a>
+                @elseif (auth()->user()->role === 'admin_rental')
+                    <a href="{{ route('admin-rental.dashboard') }}" class="auth-link">Dashboard Rental</a>
+                @endif
+
+                <form action="{{ route('logout') }}" method="POST" class="auth-inline-form">
+                    @csrf
+                    <button type="submit" class="auth-link auth-link-btn">Logout</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="auth-link">Login / Daftar</a>
+            @endauth
+
             <a href="{{ route('katalog.index') }}" class="btn btn-primary">Cari Kendaraan</a>
         </div>
 
@@ -43,7 +59,24 @@
             <a href="{{ route('katalog.index') }}" class="{{ request()->routeIs('katalog.*') || request()->routeIs('booking') || request()->routeIs('pembayaran') || request()->routeIs('pembayaran.invoice') || request()->routeIs('pembayaran.cetak') ? 'is-active' : '' }}">Katalog</a>
             <a href="{{ route('home') }}#promo">Promo</a>
             <a href="{{ route('home') }}#tentang">Tentang</a>
-            <a href="{{ route('login') }}" class="mobile-auth-link">Login / Daftar</a>
+
+            @auth
+                @if (auth()->user()->role === 'customer')
+                    <a href="{{ route('customer.bookings.index') }}" class="mobile-auth-link">My Booking</a>
+                @elseif (auth()->user()->role === 'super_admin')
+                    <a href="{{ route('super-admin.dashboard') }}" class="mobile-auth-link">Dashboard Admin</a>
+                @elseif (auth()->user()->role === 'admin_rental')
+                    <a href="{{ route('admin-rental.dashboard') }}" class="mobile-auth-link">Dashboard Rental</a>
+                @endif
+
+                <form action="{{ route('logout') }}" method="POST" class="mobile-auth-form">
+                    @csrf
+                    <button type="submit" class="mobile-auth-link mobile-auth-btn">Logout</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="mobile-auth-link">Login / Daftar</a>
+            @endauth
+
             <a href="{{ route('katalog.index') }}" class="btn btn-primary mobile-cta">Cari Kendaraan</a>
         </nav>
     </aside>

@@ -1,114 +1,173 @@
 @extends('layouts.admin')
 
-@section('title', 'Customer Aktif - Super Admin')
+@section('title', 'Customer Aktif | Super Admin')
+@section('page_title', 'Customer Aktif')
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/super-admin-report-pages.css') }}">
+@endpush
 
 @section('content')
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="h3 mb-0">⭐ Customer Aktif Platform</h1>
-            <p class="text-muted small mt-2">Customer ranking berdasarkan jumlah booking completed</p>
-        </div>
-        <div class="col-auto">
-            <a href="{{ route('super-admin.reports.index') }}" class="btn btn-secondary btn-sm">← Kembali</a>
-        </div>
-    </div>
+    @php
+        $totalActiveCustomers = $activeCustomers->count();
+        $totalCompletedBookings = (int) $activeCustomers->sum('completed_booking_count');
+        $totalTransactions = (float) $activeCustomers->sum('total_transaction');
+        $loyalCustomers = $activeCustomers->filter(fn($customer) => ((int) ($customer->completed_booking_count ?? 0)) >= $loyalThreshold)->count();
+    @endphp
 
-    <!-- Filter -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-2">
-                    <label for="start_date" class="form-label small">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control form-control-sm"
-                        value="{{ request('start_date') }}">
+    <div class="report-page">
+        <section class="report-header-card">
+            <div class="report-header-top">
+                <div>
+                    <h2>Customer Aktif</h2>
+                    <p>Evaluasi performa customer berdasarkan aktivitas booking dan nilai transaksi.</p>
                 </div>
-                <div class="col-md-2">
-                    <label for="end_date" class="form-label small">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control form-control-sm"
-                        value="{{ request('end_date') }}">
+                <a href="{{ route('super-admin.reports.index') }}" class="report-back-link">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    <span>Kembali ke Laporan</span>
+                </a>
+            </div>
+        </section>
+
+        @if ($errors->any())
+            <section class="report-inline-alert is-danger" role="alert">
+                <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+                <div>
+                    <strong>Filter tidak valid</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-                <div class="col-md-2">
-                    <label for="limit" class="form-label small">Limit</label>
-                    <select name="limit" id="limit" class="form-select form-select-sm">
-                        <option value="20" @selected(request('limit', 20) == 20)>20</option>
-                        <option value="50" @selected(request('limit', 20) == 50)>50</option>
-                        <option value="100" @selected(request('limit', 20) == 100)>100</option>
+            </section>
+        @endif
+
+        <section class="report-filter-card">
+            <form method="GET" action="{{ route('super-admin.reports.active-customers') }}" class="report-filter-grid is-compact">
+                <div class="report-filter-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                </div>
+                <div class="report-filter-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                </div>
+                <div class="report-filter-group">
+                    <label for="limit">Jumlah Data</label>
+                    <select id="limit" name="limit">
+                        <option value="20" @selected((int) request('limit', 20) === 20)>20</option>
+                        <option value="50" @selected((int) request('limit', 20) === 50)>50</option>
+                        <option value="100" @selected((int) request('limit', 20) === 100)>100</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <a href="{{ route('super-admin.reports.active-customers') }}" class="btn btn-secondary btn-sm w-100">Reset</a>
+                <div class="report-filter-actions">
+                    <button type="submit" class="report-btn-primary">
+                        <i class="bi bi-funnel-fill" aria-hidden="true"></i>
+                        <span>Terapkan Filter</span>
+                    </button>
+                    <a href="{{ route('super-admin.reports.active-customers') }}" class="report-btn-secondary">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                        <span>Reset</span>
+                    </a>
                 </div>
             </form>
-        </div>
-    </div>
+        </section>
 
-    <!-- Data Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="px-3 text-center" style="width: 60px">#</th>
-                            <th class="px-3">Nama Customer</th>
-                            <th class="px-3">Email</th>
-                            <th class="px-3">Phone</th>
-                            <th class="px-3 text-center">Total Booking</th>
-                            <th class="px-3 text-center">Completed</th>
-                            <th class="px-3 text-end">Total Transaksi</th>
-                            <th class="px-3">Last Booking</th>
-                            <th class="px-3">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($activeCustomers as $index => $customer)
-                            <tr>
-                                <td class="px-3 text-center">
-                                    <strong>{{ $index + 1 }}</strong>
-                                </td>
-                                <td class="px-3"><strong>{{ $customer->name }}</strong></td>
-                                <td class="px-3"><small>{{ $customer->email }}</small></td>
-                                <td class="px-3"><small>{{ $customer->phone ?? '-' }}</small></td>
-                                <td class="px-3 text-center">
-                                    <span class="badge bg-info">{{ $customer->total_booking_count ?? 0 }}</span>
-                                </td>
-                                <td class="px-3 text-center">
-                                    <span class="badge bg-success">{{ $customer->completed_booking_count ?? 0 }}</span>
-                                </td>
-                                <td class="px-3 text-end">
-                                    <strong>Rp {{ number_format($customer->total_transaction ?? 0, 0, ',', '.') }}</strong>
-                                </td>
-                                <td class="px-3">
-                                    <small>{{ $customer->last_booking_date?->format('d M Y') ?? '-' }}</small>
-                                </td>
-                                <td class="px-3">
-                                    @if (($customer->completed_booking_count ?? 0) >= $loyalThreshold)
-                                        <span class="badge bg-warning">🏅 Loyal</span>
-                                    @else
-                                        <span class="badge bg-secondary">Regular</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="9" class="px-3 py-4 text-center text-muted">
-                                    <small>Belum ada data customer aktif</small>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        <section class="report-stat-grid">
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-people" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Customer Aktif</p>
+                    <h3>{{ number_format($totalActiveCustomers, 0, ',', '.') }}</h3>
+                </div>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-check2-all" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Booking Completed</p>
+                    <h3>{{ number_format($totalCompletedBookings, 0, ',', '.') }}</h3>
+                </div>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Transaksi</p>
+                    <h3>Rp {{ number_format($totalTransactions, 0, ',', '.') }}</h3>
+                </div>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-award" aria-hidden="true"></i></div>
+                <div>
+                    <p>Loyal Customer</p>
+                    <h3>{{ number_format($loyalCustomers, 0, ',', '.') }}</h3>
+                    <small>Min. {{ $loyalThreshold }} booking completed</small>
+                </div>
+            </article>
+        </section>
+
+        <section class="report-table-card">
+            <div class="report-table-head">
+                <h3>Data Customer Aktif</h3>
+                <p>Loyal customer ditentukan berdasarkan ambang minimal booking selesai.</p>
             </div>
-        </div>
-    </div>
 
-    <div class="mt-2 text-muted small">
-        <p>🏅 <strong>Loyal Customer:</strong> Customer dengan minimal {{ $loyalThreshold }} booking completed</p>
+            @if ($activeCustomers->count() > 0)
+                <div class="report-table-wrap">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th class="is-center">No</th>
+                                <th>Nama Customer</th>
+                                <th>Email</th>
+                                <th>Nomor HP</th>
+                                <th class="is-center">Total Booking</th>
+                                <th class="is-center">Booking Completed</th>
+                                <th class="is-number">Total Transaksi</th>
+                                <th>Last Booking Date</th>
+                                <th>Status Loyal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($activeCustomers as $index => $customer)
+                                @php
+                                    $isLoyal = ((int) ($customer->completed_booking_count ?? 0)) >= $loyalThreshold;
+                                    $lastBookingDateText = '-';
+                                    if ($customer->last_booking_date instanceof \Carbon\CarbonInterface) {
+                                        $lastBookingDateText = $customer->last_booking_date->format('d M Y H:i');
+                                    } elseif (!empty($customer->last_booking_date)) {
+                                        $lastBookingDateText = \Illuminate\Support\Carbon::parse($customer->last_booking_date)->format('d M Y H:i');
+                                    }
+                                @endphp
+                                <tr>
+                                    <td class="is-center">{{ $index + 1 }}</td>
+                                    <td>{{ $customer->name }}</td>
+                                    <td>{{ $customer->email }}</td>
+                                    <td>{{ $customer->phone ?? '-' }}</td>
+                                    <td class="is-center">{{ number_format((int) ($customer->total_booking_count ?? 0), 0, ',', '.') }}</td>
+                                    <td class="is-center">{{ number_format((int) ($customer->completed_booking_count ?? 0), 0, ',', '.') }}</td>
+                                    <td class="is-number">Rp {{ number_format((float) ($customer->total_transaction ?? 0), 0, ',', '.') }}</td>
+                                    <td>{{ $lastBookingDateText }}</td>
+                                    <td>
+                                        @if ($isLoyal)
+                                            <span class="report-badge is-accent">Loyal</span>
+                                        @else
+                                            <span class="report-badge is-muted">Regular</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="report-empty-state">
+                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                    <h4>Belum ada data customer aktif</h4>
+                    <p>Belum ada data laporan untuk filter yang dipilih.</p>
+                </div>
+            @endif
+        </section>
     </div>
-</div>
 @endsection

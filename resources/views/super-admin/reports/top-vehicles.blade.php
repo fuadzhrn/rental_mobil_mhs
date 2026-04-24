@@ -1,96 +1,154 @@
 @extends('layouts.admin')
 
-@section('title', 'Kendaraan Terlaris - Super Admin')
+@section('title', 'Kendaraan Terlaris | Super Admin')
+@section('page_title', 'Kendaraan Terlaris')
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/super-admin-report-pages.css') }}">
+@endpush
 
 @section('content')
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="h3 mb-0">🏆 Kendaraan Terlaris Platform</h1>
-            <p class="text-muted small mt-2">Ranking kendaraan berdasarkan jumlah booking verified</p>
-        </div>
-        <div class="col-auto">
-            <a href="{{ route('super-admin.reports.index') }}" class="btn btn-secondary btn-sm">← Kembali</a>
-        </div>
-    </div>
+    @php
+        $topBookedVehicle = $topVehicles->first();
+        $totalValidBookings = (int) $topVehicles->sum('verified_booking_count');
+        $totalVehicleRevenue = (float) $topVehicles->sum(fn($vehicle) => (float) ($vehicle->total_revenue ?? 0));
+    @endphp
 
-    <!-- Filter -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-2">
-                    <label for="start_date" class="form-label small">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control form-control-sm"
-                        value="{{ request('start_date') }}">
+    <div class="report-page">
+        <section class="report-header-card">
+            <div class="report-header-top">
+                <div>
+                    <h2>Kendaraan Terlaris</h2>
+                    <p>Laporan ranking kendaraan berdasarkan booking valid dan total pendapatan.</p>
                 </div>
-                <div class="col-md-2">
-                    <label for="end_date" class="form-label small">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control form-control-sm"
-                        value="{{ request('end_date') }}">
+                <a href="{{ route('super-admin.reports.index') }}" class="report-back-link">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    <span>Kembali ke Laporan</span>
+                </a>
+            </div>
+        </section>
+
+        @if ($errors->any())
+            <section class="report-inline-alert is-danger" role="alert">
+                <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+                <div>
+                    <strong>Filter tidak valid</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-                <div class="col-md-2">
-                    <label for="limit" class="form-label small">Limit</label>
-                    <select name="limit" id="limit" class="form-select form-select-sm">
-                        <option value="20" @selected(request('limit', 20) == 20)>20</option>
-                        <option value="50" @selected(request('limit', 20) == 50)>50</option>
-                        <option value="100" @selected(request('limit', 20) == 100)>100</option>
+            </section>
+        @endif
+
+        <section class="report-filter-card">
+            <form method="GET" action="{{ route('super-admin.reports.top-vehicles') }}" class="report-filter-grid is-compact">
+                <div class="report-filter-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                </div>
+                <div class="report-filter-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                </div>
+                <div class="report-filter-group">
+                    <label for="limit">Jumlah Data</label>
+                    <select id="limit" name="limit">
+                        <option value="20" @selected((int) request('limit', 20) === 20)>20</option>
+                        <option value="50" @selected((int) request('limit', 20) === 50)>50</option>
+                        <option value="100" @selected((int) request('limit', 20) === 100)>100</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <a href="{{ route('super-admin.reports.top-vehicles') }}" class="btn btn-secondary btn-sm w-100">Reset</a>
+                <div class="report-filter-actions">
+                    <button type="submit" class="report-btn-primary">
+                        <i class="bi bi-funnel-fill" aria-hidden="true"></i>
+                        <span>Terapkan Filter</span>
+                    </button>
+                    <a href="{{ route('super-admin.reports.top-vehicles') }}" class="report-btn-secondary">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                        <span>Reset</span>
+                    </a>
                 </div>
             </form>
-        </div>
-    </div>
+        </section>
 
-    <!-- Data Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="px-3 text-center" style="width: 60px">#</th>
-                            <th class="px-3">Nama Kendaraan</th>
-                            <th class="px-3">Brand</th>
-                            <th class="px-3">Rental</th>
-                            <th class="px-3">Category</th>
-                            <th class="px-3 text-center">Total Booking</th>
-                            <th class="px-3 text-end">Total Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($topVehicles as $index => $vehicle)
-                            <tr>
-                                <td class="px-3 text-center">
-                                    <strong>{{ $index + 1 }}</strong>
-                                </td>
-                                <td class="px-3"><strong>{{ $vehicle->name }}</strong></td>
-                                <td class="px-3"><small>{{ $vehicle->brand ?? '-' }}</small></td>
-                                <td class="px-3"><small>{{ $vehicle->rentalCompany->company_name ?? '-' }}</small></td>
-                                <td class="px-3"><small>{{ $vehicle->category ?? '-' }}</small></td>
-                                <td class="px-3 text-center">
-                                    <span class="badge bg-info">{{ $vehicle->verified_booking_count ?? 0 }}</span>
-                                </td>
-                                <td class="px-3 text-end">
-                                    <strong>Rp {{ number_format($vehicle->total_revenue ?? 0, 0, ',', '.') }}</strong>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-3 py-4 text-center text-muted">
-                                    <small>Belum ada data kendaraan</small>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        <section class="report-stat-grid">
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-car-front" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Kendaraan Tercatat</p>
+                    <h3>{{ number_format($topVehicles->count(), 0, ',', '.') }}</h3>
+                    <small>sesuai hasil filter</small>
+                </div>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-trophy" aria-hidden="true"></i></div>
+                <div>
+                    <p>Top Booked Vehicle</p>
+                    <h3>{{ $topBookedVehicle?->name ?? '-' }}</h3>
+                    <small>{{ $topBookedVehicle?->rentalCompany?->company_name ?? '-' }}</small>
+                </div>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-clipboard2-check" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Booking Valid</p>
+                    <h3>{{ number_format($totalValidBookings, 0, ',', '.') }}</h3>
+                </div>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-currency-dollar" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Pendapatan Kendaraan</p>
+                    <h3>Rp {{ number_format($totalVehicleRevenue, 0, ',', '.') }}</h3>
+                </div>
+            </article>
+        </section>
+
+        <section class="report-table-card">
+            <div class="report-table-head">
+                <h3>Data Kendaraan Terlaris</h3>
+                <p>Bandingkan performa kendaraan antar rental berdasarkan booking valid dan revenue.</p>
             </div>
-        </div>
+
+            @if ($topVehicles->count() > 0)
+                <div class="report-table-wrap">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th class="is-center">No</th>
+                                <th>Nama Kendaraan</th>
+                                <th>Rental</th>
+                                <th>Brand</th>
+                                <th>Kategori</th>
+                                <th class="is-center">Total Booking Valid</th>
+                                <th class="is-number">Total Pendapatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($topVehicles as $index => $vehicle)
+                                <tr>
+                                    <td class="is-center">{{ $index + 1 }}</td>
+                                    <td>{{ $vehicle->name }}</td>
+                                    <td>{{ $vehicle->rentalCompany?->company_name ?? '-' }}</td>
+                                    <td>{{ $vehicle->brand ?? '-' }}</td>
+                                    <td>{{ $vehicle->category ?? '-' }}</td>
+                                    <td class="is-center">{{ number_format((int) ($vehicle->verified_booking_count ?? 0), 0, ',', '.') }}</td>
+                                    <td class="is-number">Rp {{ number_format((float) ($vehicle->total_revenue ?? 0), 0, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="report-empty-state">
+                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                    <h4>Belum ada data kendaraan terlaris</h4>
+                    <p>Belum ada data laporan untuk filter yang dipilih.</p>
+                </div>
+            @endif
+        </section>
     </div>
-</div>
 @endsection

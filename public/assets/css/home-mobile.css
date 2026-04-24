@@ -156,6 +156,26 @@
         background: #fff !important;
     }
 
+    .mobile-auth-form {
+        margin: 0;
+    }
+
+    .mobile-nav-links .mobile-auth-btn {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+        font-family: "Montserrat", sans-serif;
+        font-weight: 600;
+        color: var(--text-primary);
+        background: #fff;
+        border: 1px solid #edf1f7;
+        cursor: pointer;
+        text-align: left;
+    }
+
     .mobile-cta {
         margin-top: 6px;
         min-height: 50px;

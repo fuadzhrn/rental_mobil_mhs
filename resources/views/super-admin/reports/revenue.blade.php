@@ -1,125 +1,144 @@
 @extends('layouts.admin')
 
-@section('title', 'Pendapatan Rental - Super Admin')
+@section('title', 'Pendapatan Rental | Super Admin')
+@section('page_title', 'Pendapatan Rental')
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/super-admin-report-pages.css') }}">
+@endpush
 
 @section('content')
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="h3 mb-0">💵 Laporan Pendapatan Rental</h1>
-            <p class="text-muted small mt-2">Revenue breakdown per rental dan kalkulasi komisi platform</p>
-        </div>
-        <div class="col-auto">
-            <a href="{{ route('super-admin.reports.index') }}" class="btn btn-secondary btn-sm">← Kembali</a>
-        </div>
-    </div>
+    <div class="report-page">
+        <section class="report-header-card">
+            <div class="report-header-top">
+                <div>
+                    <h2>Pendapatan Rental</h2>
+                    <p>Ringkasan pendapatan kotor, komisi platform, dan estimasi pendapatan bersih setiap rental.</p>
+                </div>
+                <a href="{{ route('super-admin.reports.index') }}" class="report-back-link">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    <span>Kembali ke Laporan</span>
+                </a>
+            </div>
+        </section>
 
-    <!-- Filter -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-2">
-                    <label for="start_date" class="form-label small">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control form-control-sm"
-                        value="{{ request('start_date') }}">
+        @if ($errors->any())
+            <section class="report-inline-alert is-danger" role="alert">
+                <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+                <div>
+                    <strong>Filter tidak valid</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-                <div class="col-md-2">
-                    <label for="end_date" class="form-label small">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control form-control-sm"
-                        value="{{ request('end_date') }}">
+            </section>
+        @endif
+
+        <section class="report-filter-card">
+            <form method="GET" action="{{ route('super-admin.reports.revenue') }}" class="report-filter-grid is-compact">
+                <div class="report-filter-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}">
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
+                <div class="report-filter-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}">
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <a href="{{ route('super-admin.reports.revenue') }}" class="btn btn-secondary btn-sm w-100">Reset</a>
+                <div class="report-filter-actions">
+                    <button type="submit" class="report-btn-primary">
+                        <i class="bi bi-funnel-fill" aria-hidden="true"></i>
+                        <span>Terapkan Filter</span>
+                    </button>
+                    <a href="{{ route('super-admin.reports.revenue') }}" class="report-btn-secondary">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                        <span>Reset</span>
+                    </a>
                 </div>
             </form>
-        </div>
-    </div>
+        </section>
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <p class="text-muted small mb-1">Total Pendapatan (Gross)</p>
-                    <h3 class="mb-0">Rp {{ number_format($totalGross, 0, ',', '.') }}</h3>
+        <section class="report-stat-grid">
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Pendapatan Kotor</p>
+                    <h3>Rp {{ number_format((float) $totalGross, 0, ',', '.') }}</h3>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <p class="text-muted small mb-1">Total Komisi Platform (10%)</p>
-                    <h3 class="mb-0">Rp {{ number_format($totalCommission, 0, ',', '.') }}</h3>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-percent" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Komisi Platform</p>
+                    <h3>Rp {{ number_format((float) $totalCommission, 0, ',', '.') }}</h3>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <p class="text-muted small mb-1">Total Pendapatan Bersih (Net)</p>
-                    <h3 class="mb-0">Rp {{ number_format($totalNet, 0, ',', '.') }}</h3>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-wallet2" aria-hidden="true"></i></div>
+                <div>
+                    <p>Estimasi Pendapatan Bersih</p>
+                    <h3>Rp {{ number_format((float) $totalNet, 0, ',', '.') }}</h3>
                 </div>
-            </div>
-        </div>
-    </div>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-building" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Rental Aktif</p>
+                    <h3>{{ number_format($revenues->count(), 0, ',', '.') }}</h3>
+                </div>
+            </article>
+        </section>
 
-    <!-- Data Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="px-3">Nama Rental</th>
-                            <th class="px-3 text-center">Booking Verified</th>
-                            <th class="px-3 text-end">Pendapatan Gross</th>
-                            <th class="px-3 text-end">Komisi (10%)</th>
-                            <th class="px-3 text-end">Pendapatan Net</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($revenues as $item)
+        <section class="report-table-card">
+            <div class="report-table-head">
+                <h3>Data Pendapatan Rental</h3>
+                <p>Semua nominal dihitung dari transaksi terverifikasi pada rentang tanggal yang dipilih.</p>
+            </div>
+
+            @if ($revenues->count() > 0)
+                <div class="report-table-wrap">
+                    <table class="report-table">
+                        <thead>
                             <tr>
-                                <td class="px-3">
-                                    <strong>{{ $item['rental']->company_name }}</strong>
-                                    <br>
-                                    <small class="text-muted">{{ $item['rental']->user?->name ?? '-' }}</small>
-                                </td>
-                                <td class="px-3 text-center">
-                                    <span class="badge bg-info">{{ $item['verified_booking_count'] }}</span>
-                                </td>
-                                <td class="px-3 text-end">
-                                    <strong>Rp {{ number_format($item['gross_revenue'], 0, ',', '.') }}</strong>
-                                </td>
-                                <td class="px-3 text-end">
-                                    <strong class="text-danger">Rp {{ number_format($item['commission'], 0, ',', '.') }}</strong>
-                                </td>
-                                <td class="px-3 text-end">
-                                    <strong class="text-success">Rp {{ number_format($item['net_revenue'], 0, ',', '.') }}</strong>
-                                </td>
+                                <th class="is-center">No</th>
+                                <th>Nama Rental</th>
+                                <th class="is-center">Total Booking Verified</th>
+                                <th class="is-number">Pendapatan Kotor</th>
+                                <th class="is-number">Komisi Platform</th>
+                                <th class="is-number">Estimasi Pendapatan Bersih</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-3 py-4 text-center text-muted">
-                                    <small>Belum ada data pendapatan</small>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+                        </thead>
+                        <tbody>
+                            @foreach ($revenues as $index => $item)
+                                <tr>
+                                    <td class="is-center">{{ $index + 1 }}</td>
+                                    <td>
+                                        {{ $item['rental']->company_name }}
+                                        <br>
+                                        <small>{{ $item['rental']->user?->name ?? '-' }}</small>
+                                    </td>
+                                    <td class="is-center">{{ number_format((int) ($item['verified_booking_count'] ?? 0), 0, ',', '.') }}</td>
+                                    <td class="is-number">Rp {{ number_format((float) ($item['gross_revenue'] ?? 0), 0, ',', '.') }}</td>
+                                    <td class="is-number">Rp {{ number_format((float) ($item['commission'] ?? 0), 0, ',', '.') }}</td>
+                                    <td class="is-number is-primary-value">Rp {{ number_format((float) ($item['net_revenue'] ?? 0), 0, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="report-empty-state">
+                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                    <h4>Belum ada data pendapatan rental</h4>
+                    <p>Belum ada data laporan untuk filter yang dipilih.</p>
+                </div>
+            @endif
+        </section>
 
-    <div class="mt-3 alert alert-info alert-sm">
-        <small>
-            <strong>Catatan:</strong> Komisi platform dihitung 10% dari total pendapatan verified.
-            Pendapatan Bersih = Pendapatan Gross - Komisi Platform
-        </small>
+        <section class="report-note-card">
+            <strong>Catatan:</strong> Estimasi pendapatan bersih dihitung menggunakan formula pendapatan kotor dikurangi komisi platform.
+        </section>
     </div>
-</div>
 @endsection

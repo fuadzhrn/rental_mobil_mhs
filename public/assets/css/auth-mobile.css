@@ -84,6 +84,10 @@
         padding: 18px;
     }
 
+    .auth-card--wide {
+        width: 100%;
+    }
+
     .auth-card h2 {
         font-size: 1.34rem;
     }
@@ -105,6 +109,23 @@
     .btn-primary {
         min-height: 48px;
         width: 100%;
+    }
+
+    .btn-secondary {
+        min-height: 48px;
+        width: 100%;
+    }
+
+    .form-grid--two {
+        grid-template-columns: 1fr;
+    }
+
+    .section-card {
+        padding: 14px;
+    }
+
+    .info-box {
+        padding: 16px;
     }
 
     .auth-switch,

@@ -73,10 +73,15 @@
             <button type="submit" class="btn-primary">Masuk Sekarang</button>
         </form>
 
-        <p class="auth-switch">
-            Belum punya akun customer?
-            <a href="{{ route('register') }}">Daftar</a>
-        </p>
+        <div class="auth-cta-block" aria-label="Akses pendaftaran customer">
+            <p class="auth-switch">Belum punya akun customer?</p>
+            <a href="{{ route('register') }}" class="btn-secondary">Daftar Customer</a>
+        </div>
+
+        <div class="auth-cta-block auth-cta-block--subtle" aria-label="Akses pendaftaran rental">
+            <p class="auth-switch">Punya usaha rental mobil?</p>
+            <a href="{{ route('rental.register.show') }}" class="btn-secondary btn-secondary--outline">Daftar Rental Company</a>
+        </div>
 
         <a href="{{ route('home') }}" class="back-link">Kembali ke beranda</a>
     </article>

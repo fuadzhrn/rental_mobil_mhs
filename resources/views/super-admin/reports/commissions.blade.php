@@ -1,149 +1,193 @@
 @extends('layouts.admin')
 
-@section('title', 'Komisi Platform - Super Admin')
+@section('title', 'Komisi Platform | Super Admin')
+@section('page_title', 'Komisi Platform')
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/super-admin-report-pages.css') }}">
+@endpush
 
 @section('content')
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="h3 mb-0">🔢 Laporan Komisi Platform</h1>
-            <p class="text-muted small mt-2">Detail komisi platform dari seluruh transaksi verified</p>
-        </div>
-        <div class="col-auto">
-            <a href="{{ route('super-admin.reports.index') }}" class="btn btn-secondary btn-sm">← Kembali</a>
-        </div>
-    </div>
+    @php
+        $paymentStatusBadge = function (?string $status): string {
+            return match (strtolower((string) $status)) {
+                'verified' => 'is-success',
+                'uploaded' => 'is-info',
+                'rejected' => 'is-danger',
+                'unpaid' => 'is-muted',
+                default => 'is-muted',
+            };
+        };
 
-    <!-- Filter -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-2">
-                    <label for="start_date" class="form-label small">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control form-control-sm"
-                        value="{{ request('start_date') }}">
+        $bookingStatusBadge = function (?string $status): string {
+            return match (strtolower((string) $status)) {
+                'confirmed', 'ongoing' => 'is-info',
+                'completed' => 'is-success',
+                'waiting_payment', 'waiting_verification' => 'is-warning',
+                'cancelled' => 'is-danger',
+                default => 'is-muted',
+            };
+        };
+
+        $totalContributingRentals = $commissions->getCollection()->pluck('rental_company_id')->filter()->unique()->count();
+    @endphp
+
+    <div class="report-page">
+        <section class="report-header-card">
+            <div class="report-header-top">
+                <div>
+                    <h2>Komisi Platform</h2>
+                    <p>Ringkasan komisi platform dari transaksi valid beserta detail setiap booking.</p>
                 </div>
-                <div class="col-md-2">
-                    <label for="end_date" class="form-label small">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control form-control-sm"
-                        value="{{ request('end_date') }}">
+                <a href="{{ route('super-admin.reports.index') }}" class="report-back-link">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    <span>Kembali ke Laporan</span>
+                </a>
+            </div>
+        </section>
+
+        @if ($errors->any())
+            <section class="report-inline-alert is-danger" role="alert">
+                <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+                <div>
+                    <strong>Filter tidak valid</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-                <div class="col-md-2">
-                    <label for="rental_id" class="form-label small">Rental</label>
-                    <select name="rental_id" id="rental_id" class="form-select form-select-sm">
+            </section>
+        @endif
+
+        <section class="report-filter-card">
+            <form method="GET" action="{{ route('super-admin.reports.commissions') }}" class="report-filter-grid is-compact">
+                <div class="report-filter-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}">
+                </div>
+                <div class="report-filter-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}">
+                </div>
+                <div class="report-filter-group">
+                    <label for="rental_id">Rental</label>
+                    <select id="rental_id" name="rental_id">
                         <option value="">Semua Rental</option>
                         @foreach ($rentalCompanies as $rental)
-                            <option value="{{ $rental->id }}" @selected(request('rental_id') == $rental->id)>
+                            <option value="{{ $rental->id }}" @selected((string) request('rental_id') === (string) $rental->id)>
                                 {{ $rental->company_name }}
                             </option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <a href="{{ route('super-admin.reports.commissions') }}" class="btn btn-secondary btn-sm w-100">Reset</a>
+                <div class="report-filter-actions">
+                    <button type="submit" class="report-btn-primary">
+                        <i class="bi bi-funnel-fill" aria-hidden="true"></i>
+                        <span>Terapkan Filter</span>
+                    </button>
+                    <a href="{{ route('super-admin.reports.commissions') }}" class="report-btn-secondary">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                        <span>Reset</span>
+                    </a>
                 </div>
             </form>
-        </div>
-    </div>
+        </section>
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <p class="text-muted small mb-1">Total Transaksi</p>
-                    <h3 class="mb-0">{{ $summary['total_transactions'] }}</h3>
+        <section class="report-stat-grid">
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Komisi Platform</p>
+                    <h3>Rp {{ number_format((float) ($summary['total_commission'] ?? 0), 0, ',', '.') }}</h3>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <p class="text-muted small mb-1">Gross Revenue</p>
-                    <h3 class="mb-0 small">Rp {{ number_format($summary['total_gross_revenue'], 0, ',', '.') }}</h3>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-receipt-cutoff" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Transaksi Valid</p>
+                    <h3>{{ number_format((int) ($summary['total_transactions'] ?? 0), 0, ',', '.') }}</h3>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <p class="text-muted small mb-1">Total Komisi (10%)</p>
-                    <h3 class="mb-0 small">Rp {{ number_format($summary['total_commission'], 0, ',', '.') }}</h3>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-building" aria-hidden="true"></i></div>
+                <div>
+                    <p>Total Rental Berkontribusi</p>
+                    <h3>{{ number_format($totalContributingRentals, 0, ',', '.') }}</h3>
+                    <small>berdasarkan data halaman ini</small>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <p class="text-muted small mb-1">Avg per Booking</p>
-                    <h3 class="mb-0 small">Rp {{ number_format($summary['avg_commission_per_booking'], 0, ',', '.') }}</h3>
+            </article>
+            <article class="report-stat-card">
+                <div class="report-stat-icon"><i class="bi bi-calculator" aria-hidden="true"></i></div>
+                <div>
+                    <p>Rata-rata Komisi per Transaksi</p>
+                    <h3>Rp {{ number_format((float) ($summary['avg_commission_per_booking'] ?? 0), 0, ',', '.') }}</h3>
                 </div>
-            </div>
-        </div>
-    </div>
+            </article>
+        </section>
 
-    <!-- Data Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="px-3">Booking Code</th>
-                            <th class="px-3">Rental</th>
-                            <th class="px-3">Customer</th>
-                            <th class="px-3 text-end">Amount</th>
-                            <th class="px-3 text-end">Komisi (10%)</th>
-                            <th class="px-3">Status</th>
-                            <th class="px-3">Booking Status</th>
-                            <th class="px-3">Tanggal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($commissions as $booking)
+        <section class="report-table-card">
+            <div class="report-table-head">
+                <h3>Data Komisi</h3>
+                <p>Nilai komisi ditampilkan lebih menonjol agar proses monitoring dan validasi lebih cepat.</p>
+            </div>
+
+            @if ($commissions->count() > 0)
+                <div class="report-table-wrap">
+                    <table class="report-table">
+                        <thead>
                             <tr>
-                                <td class="px-3"><small class="font-monospace">{{ $booking->booking_code }}</small></td>
-                                <td class="px-3"><small>{{ $booking->rentalCompany->company_name ?? '-' }}</small></td>
-                                <td class="px-3"><small>{{ $booking->customer->name ?? '-' }}</small></td>
-                                <td class="px-3 text-end"><strong>Rp {{ number_format($booking->total_amount, 0, ',', '.') }}</strong></td>
-                                <td class="px-3 text-end">
-                                    <strong class="text-danger">Rp {{ number_format($booking->commission_amount, 0, ',', '.') }}</strong>
-                                </td>
-                                <td class="px-3">
-                                    <span class="badge bg-success">{{ $booking->paymentStatusLabel() }}</span>
-                                </td>
-                                <td class="px-3">
-                                    <span class="badge bg-info">{{ $booking->bookingStatusLabel() }}</span>
-                                </td>
-                                <td class="px-3"><small>{{ $booking->created_at->format('d M Y') }}</small></td>
+                                <th class="is-center">No</th>
+                                <th>Booking Code</th>
+                                <th>Rental</th>
+                                <th>Customer</th>
+                                <th class="is-number">Total Booking</th>
+                                <th class="is-number">Nilai Komisi</th>
+                                <th>Payment Status</th>
+                                <th>Booking Status</th>
+                                <th>Tanggal Transaksi</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="px-3 py-4 text-center text-muted">
-                                    <small>Belum ada data komisi</small>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+                        </thead>
+                        <tbody>
+                            @foreach ($commissions as $index => $booking)
+                                @php
+                                    $transactionDate = $booking->payment?->verified_at ?? $booking->payment?->paid_at ?? $booking->created_at;
+                                @endphp
+                                <tr>
+                                    <td class="is-center">{{ ($commissions->firstItem() ?? 1) + $index }}</td>
+                                    <td class="is-code">{{ $booking->booking_code }}</td>
+                                    <td>{{ $booking->rentalCompany?->company_name ?? '-' }}</td>
+                                    <td>{{ $booking->customer_name ?: ($booking->customer?->name ?? '-') }}</td>
+                                    <td class="is-number">Rp {{ number_format((float) $booking->total_amount, 0, ',', '.') }}</td>
+                                    <td class="is-number is-primary-value">Rp {{ number_format((float) ($booking->commission_amount ?? 0), 0, ',', '.') }}</td>
+                                    <td>
+                                        <span class="report-badge {{ $paymentStatusBadge($booking->payment_status) }}">
+                                            {{ $booking->paymentStatusLabel() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="report-badge {{ $bookingStatusBadge($booking->booking_status) }}">
+                                            {{ $booking->bookingStatusLabel() }}
+                                        </span>
+                                    </td>
+                                    <td>{{ optional($transactionDate)->format('d M Y H:i') ?? '-' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-    <!-- Pagination -->
-    <div class="mt-3">
-        {{ $commissions->links('pagination::bootstrap-4') }}
+                <div class="report-pagination-wrap">
+                    {{ $commissions->links() }}
+                </div>
+            @else
+                <div class="report-empty-state">
+                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                    <h4>Belum ada data komisi platform</h4>
+                    <p>Belum ada data laporan untuk filter yang dipilih.</p>
+                </div>
+            @endif
+        </section>
     </div>
-
-    <div class="mt-3 alert alert-info alert-sm">
-        <small>
-            <strong>Komisi Platform:</strong> Dihitung 10% dari nominal transaksi dengan payment_status = verified.
-            Hanya transaksi yang terverifikasi yang masuk dalam perhitungan komisi.
-        </small>
-    </div>
-</div>
 @endsection

@@ -9,6 +9,8 @@ use App\Http\Controllers\AdminRental\PromoController as AdminRentalPromoControll
 use App\Http\Controllers\AdminRental\ReportController as AdminRentalReportController;
 use App\Http\Controllers\AdminRental\VehicleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\RentalRegistrationController;
 use App\Http\Controllers\Customer\MyBookingController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
 use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
@@ -27,6 +29,9 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+Route::get('/register-rental', [RentalRegistrationController::class, 'show'])->name('rental.register.show');
+Route::post('/register-rental', [RentalRegistrationController::class, 'store'])->name('rental.register.store');
+Route::get('/register-rental/success/{company}', [RentalRegistrationController::class, 'success'])->name('rental.register.success');
 
 Route::middleware('auth')->group(function (): void {
 	Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -70,7 +75,8 @@ Route::middleware('auth')->group(function (): void {
 		});
 });
 
-Route::view('/', 'home.index')->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::post('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
 Route::get('/katalog/{vehicle:slug}', [KatalogController::class, 'show'])->name('katalog.show');
 
