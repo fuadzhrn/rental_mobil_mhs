@@ -1,5 +1,5 @@
-<section class="section" id="katalog" aria-label="Kendaraan unggulan">
-    <div class="container">
+<section class="section home-highlight-section" id="katalog" aria-label="Kendaraan unggulan">
+    <div class="container section-container-wide">
         <div class="section-heading">
             <p class="eyebrow">Katalog Pilihan</p>
             <h2>Kendaraan Unggulan Minggu Ini</h2>

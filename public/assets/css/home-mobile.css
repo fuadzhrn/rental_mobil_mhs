@@ -7,6 +7,10 @@
         width: min(100% - 56px, var(--container));
     }
 
+    .section-container-wide {
+        width: min(100% - 56px, var(--container));
+    }
+
     .header-inner {
         gap: 18px;
     }
@@ -281,6 +285,12 @@
         padding: 18px;
     }
 
+    .home-highlight-section .feature-card,
+    .home-highlight-section .promo-card,
+    .home-highlight-section .testimonial-card {
+        min-height: 0;
+    }
+
     .vehicle-image {
         height: 200px;
     }
@@ -322,6 +332,10 @@
 
 @media (max-width: 640px) {
     .container {
+        width: min(100% - 32px, var(--container));
+    }
+
+    .section-container-wide {
         width: min(100% - 32px, var(--container));
     }
 

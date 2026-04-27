@@ -6,14 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Vehicle;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
-        $rentalId = (int) Auth::user()->rentalCompany->id;
+        $user = Auth::user();
+        $rentalCompany = $user?->rentalCompany;
+
+        // Guard against manually-created admin accounts that are not linked to a rental company yet.
+        if (!$rentalCompany) {
+            return redirect()
+                ->route('home')
+                ->with('warning', 'Akun admin rental belum terhubung ke data rental company. Silakan daftar rental terlebih dahulu.');
+        }
+
+        $rentalId = (int) $rentalCompany->id;
 
         $totalVehicles = Vehicle::query()
             ->where('rental_company_id', $rentalId)

@@ -1,5 +1,5 @@
-<section class="section" aria-label="Testimoni pelanggan">
-    <div class="container">
+<section class="section home-highlight-section" aria-label="Testimoni pelanggan">
+    <div class="container section-container-wide">
         <div class="section-heading">
             <p class="eyebrow">Cerita Pelanggan</p>
             <h2>Testimoni dari Pengguna VeloraRide</h2>

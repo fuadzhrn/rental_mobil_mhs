@@ -1,6 +1,6 @@
 <section class="hero" aria-label="Hero">
     <div class="hero-overlay"></div>
-    <div class="container hero-content-wrap">
+    <div class="container section-container-wide hero-content-wrap">
         <div class="hero-content">
             <p class="hero-badge">Platform Rental Kendaraan Premium</p>
             <h1>Temukan Kendaraan Nyaman untuk Setiap Perjalanan Anda</h1>

@@ -7,6 +7,8 @@ use App\Models\Booking;
 use App\Models\RentalCompany;
 use App\Models\User;
 use App\Models\Vehicle;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -23,26 +25,72 @@ class DashboardController extends Controller
                 Booking::BOOKING_COMPLETED,
             ]);
 
-        $totalTransaction = (float) ((clone $validCommissionBase)->sum('total_amount') ?? 0);
-        $totalCommission = round($totalTransaction * ($commissionRate / 100), 2);
+        $totalRevenue = (float) ((clone $validCommissionBase)->sum('total_amount') ?? 0);
+        $totalCommission = round($totalRevenue * ($commissionRate / 100), 2);
+
+        $totalRental = (int) RentalCompany::count();
+        $mitraRental = (int) RentalCompany::approved()->count();
+        $totalCustomers = (int) User::where('role', 'customer')->count();
+        $totalVehicles = (int) Vehicle::count();
+        $verifiedPayments = (int) Booking::where('payment_status', Booking::PAYMENT_VERIFIED)->count();
+        $pendingCount = (int) RentalCompany::where('status_verification', RentalCompany::STATUS_PENDING)->count();
+
+        $monthlyBaseQuery = Booking::query();
+        $driverName = DB::connection()->getDriverName();
+
+        $monthKeyExpression = $driverName === 'sqlite'
+            ? "strftime('%Y-%m', created_at)"
+            : "DATE_FORMAT(created_at, '%Y-%m')";
+
+        $monthlyBookingCounts = $monthlyBaseQuery
+            ->selectRaw($monthKeyExpression . ' as month_key, COUNT(*) as total')
+            ->groupByRaw($monthKeyExpression)
+            ->orderByRaw($monthKeyExpression)
+            ->pluck('total', 'month_key');
+
+        $monthlyBookings = collect(range(11, 0))
+            ->map(function (int $offset) use ($monthlyBookingCounts): array {
+                $month = Carbon::now()->startOfMonth()->subMonths($offset);
+                $monthKey = $month->format('Y-m');
+
+                return [
+                    'label' => $month->format('M Y'),
+                    'value' => (int) ($monthlyBookingCounts[$monthKey] ?? 0),
+                ];
+            })
+            ->values();
 
         $summary = [
-            ['label' => 'Total Rental', 'value' => RentalCompany::count()],
-            ['label' => 'Rental Pending', 'value' => RentalCompany::where('status_verification', RentalCompany::STATUS_PENDING)->count()],
-            ['label' => 'Total Customer', 'value' => User::where('role', 'customer')->count()],
-            ['label' => 'Total Kendaraan', 'value' => Vehicle::count()],
-            ['label' => 'Total Booking', 'value' => Booking::count()],
-            ['label' => 'Payment Verified', 'value' => Booking::where('payment_status', Booking::PAYMENT_VERIFIED)->count()],
-            ['label' => 'Total Komisi', 'value' => 'Rp ' . number_format($totalCommission, 0, ',', '.')],
+            ['label' => 'Mitra Rental', 'value' => $mitraRental, 'hint' => 'Rental approved / aktif', 'icon' => 'bi-buildings'],
+            ['label' => 'Customer', 'value' => $totalCustomers, 'hint' => 'Akun customer terdaftar', 'icon' => 'bi-people'],
+            ['label' => 'Kendaraan', 'value' => $totalVehicles, 'hint' => 'Total armada aktif', 'icon' => 'bi-car-front'],
+            ['label' => 'Total Rental', 'value' => $totalRental, 'hint' => 'Seluruh rental terdaftar', 'icon' => 'bi-shop'],
+            ['label' => 'Revenue', 'value' => 'Rp ' . number_format($totalRevenue, 0, ',', '.'), 'hint' => 'Transaksi verified', 'icon' => 'bi-cash-stack'],
+            ['label' => 'Payment Verified', 'value' => $verifiedPayments, 'hint' => 'Pembayaran terverifikasi', 'icon' => 'bi-patch-check'],
+            ['label' => 'Pending', 'value' => $pendingCount, 'hint' => 'Rental menunggu verifikasi', 'icon' => 'bi-hourglass-split'],
+            ['label' => 'Komisi', 'value' => 'Rp ' . number_format($totalCommission, 0, ',', '.'), 'hint' => 'Estimasi komisi platform', 'icon' => 'bi-percent'],
         ];
 
         $quickLinks = [
-            ['label' => 'Verifikasi Rental', 'route' => route('super-admin.rentals.index')],
-            ['label' => 'Semua User', 'route' => route('super-admin.users.index')],
-            ['label' => 'Laporan', 'route' => route('super-admin.reports.index')],
-                ['label' => 'Komisi', 'route' => route('super-admin.reports.commissions')],
+            ['label' => 'Verifikasi Rental', 'route' => route('super-admin.rentals.index'), 'icon' => 'bi-shield-check', 'hint' => 'Tinjau pengajuan partner'],
+            ['label' => 'Semua User', 'route' => route('super-admin.users.index'), 'icon' => 'bi-people', 'hint' => 'Kelola akun sistem'],
+            ['label' => 'Laporan', 'route' => route('super-admin.reports.index'), 'icon' => 'bi-graph-up-arrow', 'hint' => 'Monitoring performa'],
+            ['label' => 'Komisi', 'route' => route('super-admin.reports.commissions'), 'icon' => 'bi-receipt', 'hint' => 'Detail komisi platform'],
         ];
 
-        return view('super-admin.dashboard', compact('summary', 'quickLinks', 'commissionRate'));
+        return view('super-admin.dashboard', compact(
+            'summary',
+            'quickLinks',
+            'commissionRate',
+            'totalRevenue',
+            'totalCommission',
+            'totalRental',
+            'mitraRental',
+            'totalCustomers',
+            'totalVehicles',
+            'verifiedPayments',
+            'pendingCount',
+            'monthlyBookings'
+        ));
     }
 }

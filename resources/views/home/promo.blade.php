@@ -1,5 +1,5 @@
-<section class="section section-soft" id="promo" aria-label="Promo rental">
-    <div class="container">
+<section class="section section-soft home-highlight-section" id="promo" aria-label="Promo rental">
+    <div class="container section-container-wide">
         <div class="section-heading">
             <p class="eyebrow">Penawaran Spesial</p>
             <h2>Promo Menarik untuk Perjalanan Lebih Hemat</h2>

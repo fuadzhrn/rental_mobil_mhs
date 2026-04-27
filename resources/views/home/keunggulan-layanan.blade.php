@@ -1,5 +1,5 @@
-<section class="section section-soft" id="tentang" aria-label="Keunggulan layanan">
-    <div class="container">
+<section class="section section-soft home-highlight-section" id="tentang" aria-label="Keunggulan layanan">
+    <div class="container section-container-wide">
         <div class="section-heading">
             <p class="eyebrow">Keunggulan VeloraRide</p>
             <h2>Layanan yang Dirancang untuk Kenyamanan Anda</h2>
