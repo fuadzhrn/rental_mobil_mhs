@@ -189,7 +189,7 @@
 
 .vehicles-table {
     width: 100%;
-    min-width: 1380px;
+    min-width: 1300px;
     border-collapse: collapse;
 }
 
@@ -282,6 +282,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.vehicles-actions > * {
+    flex: 0 0 auto;
 }
 
 .vehicles-actions form {

@@ -125,7 +125,6 @@
                                 <th>Kapasitas</th>
                                 <th>Harga / Hari</th>
                                 <th>Status</th>
-                                <th>Jumlah Galeri</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -165,7 +164,6 @@
                                         @endphp
                                         <span class="vehicles-status {{ $statusClass }}">{{ ucfirst($vehicle->status) }}</span>
                                     </td>
-                                    <td>{{ (int) $vehicle->images_count }}</td>
                                     <td>
                                         <div class="vehicles-actions">
                                             <a href="{{ route('admin-rental.vehicles.edit', $vehicle) }}" class="vehicles-action-btn is-edit" title="Edit kendaraan">

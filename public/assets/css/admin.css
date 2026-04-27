@@ -207,6 +207,78 @@ body.admin-page {
     color: var(--primary);
 }
 
+.admin-content .pagination-wrap,
+.admin-content .audit-pagination-wrap,
+.admin-content .report-pagination-wrap,
+.admin-content .bookings-pagination-wrap,
+.admin-content .payments-pagination-wrap,
+.admin-content .vehicles-pagination-wrap,
+.admin-content .customers-pagination-wrap,
+.admin-content .reviews-pagination-wrapper,
+.admin-content .promos-pagination-wrapper,
+.admin-content .notifications-pagination-wrapper,
+.admin-content .commissions-pagination-wrap {
+    margin-top: 14px;
+}
+
+.admin-content nav > div:first-child {
+    display: none;
+}
+
+.admin-content .pagination {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.admin-content .pagination li {
+    list-style: none;
+    margin: 0;
+}
+
+.admin-content .pagination a,
+.admin-content .pagination span {
+    min-height: 40px;
+    min-width: 40px;
+    padding: 0 12px;
+    border: 1px solid #dbe1eb;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.admin-content .pagination a:hover {
+    background: #eef4ff;
+    border-color: #a8c5ff;
+    color: #2c4ab8;
+}
+
+.admin-content .pagination .active span {
+    background: #6c8cf5;
+    border-color: #6c8cf5;
+    color: #ffffff;
+}
+
+.admin-content .pagination .disabled span {
+    background: #f9fafb;
+    color: #9ca3af;
+}
+
+.admin-content .pagination svg {
+    width: 14px;
+    height: 14px;
+}
+
 @media (max-width: 980px) {
     .admin-shell {
         grid-template-columns: 1fr;
@@ -219,5 +291,9 @@ body.admin-page {
 
     .stat-grid {
         grid-template-columns: 1fr;
+    }
+
+    .admin-content .pagination {
+        justify-content: center;
     }
 }
