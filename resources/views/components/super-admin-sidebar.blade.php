@@ -11,6 +11,7 @@
         <a href="{{ route('super-admin.reports.index') }}" class="{{ request()->routeIs('super-admin.reports.*') ? 'is-active' : '' }}">Laporan</a>
         <a href="{{ route('super-admin.reports.commissions') }}" class="{{ request()->routeIs('super-admin.reports.commissions') || request()->routeIs('super-admin.commissions.*') ? 'is-active' : '' }}">Komisi</a>
         <a href="{{ route('super-admin.activity-logs.index') }}" class="{{ request()->routeIs('super-admin.activity-logs.*') ? 'is-active' : '' }}">Audit Log</a>
+        <a href="{{ route('super-admin.inventories.index') }}" class="{{ request()->routeIs('super-admin.inventories.*') ? 'is-active' : '' }}">Inventory Monitoring</a>
         <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">Notifikasi</a>
     </nav>
 

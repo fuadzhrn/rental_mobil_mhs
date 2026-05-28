@@ -27,7 +27,11 @@ class NotificationController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('admin-rental.notifications.index', compact('notifications'));
+        $view = $request->user()->role === 'customer'
+            ? 'customer.notifications.index'
+            : 'admin-rental.notifications.index';
+
+        return view($view, compact('notifications'));
     }
 
     public function read(Request $request, UserNotification $notification): RedirectResponse

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Booking | Admin Rental')
-@section('page_title', 'Data Booking')
+@section('title', 'Konfirmasi Booking | Admin Rental')
+@section('page_title', 'Konfirmasi Booking')
 
 @push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -13,13 +13,13 @@
         <div class="bookings-breadcrumb">
             <span>Admin Rental</span>
             <i class="bi bi-chevron-right" aria-hidden="true"></i>
-            <strong>Data Booking</strong>
+            <strong>Konfirmasi Booking</strong>
         </div>
 
         <div class="bookings-header-card">
             <div>
-                <h2>Data Booking</h2>
-                <p>Pantau seluruh booking pelanggan dan kelola status transaksi rental Anda di halaman ini.</p>
+                <h2>Konfirmasi Booking</h2>
+                <p>Pantau booking pelanggan, cek ketersediaan barang, lalu konfirmasi atau tolak sesuai stok yang tersedia.</p>
                 <small>{{ $rentalCompany->company_name ?? 'Rental Company' }}</small>
             </div>
         </div>

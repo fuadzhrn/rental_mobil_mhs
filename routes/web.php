@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminRental\ReviewController as AdminRentalReviewContro
 use App\Http\Controllers\AdminRental\PromoController as AdminRentalPromoController;
 use App\Http\Controllers\AdminRental\ReportController as AdminRentalReportController;
 use App\Http\Controllers\AdminRental\VehicleController;
+use App\Http\Controllers\AdminRental\InventoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RentalRegistrationController;
@@ -45,6 +46,7 @@ Route::middleware('auth')->group(function (): void {
 		->name('super-admin.')
 		->group(function (): void {
 			Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+			Route::get('/inventories', [\App\Http\Controllers\SuperAdmin\InventoryController::class, 'index'])->name('inventories.index');
 
 			Route::get('/rentals', [SuperAdminRentalVerificationController::class, 'index'])->name('rentals.index');
 			Route::get('/rentals/{rentalCompany}', [SuperAdminRentalVerificationController::class, 'show'])->name('rentals.show');
@@ -71,6 +73,7 @@ Route::middleware('auth')->group(function (): void {
 		->group(function (): void {
 			Route::get('/dashboard', [AdminRentalDashboardController::class, 'index'])->name('dashboard');
 			Route::resource('vehicles', VehicleController::class)->except(['show']);
+			Route::resource('inventories', InventoryController::class)->only(['index','update','show']);
 			Route::delete('/vehicles/gallery/{image}', [VehicleController::class, 'destroyGalleryImage'])->name('vehicles.gallery.destroy');
 		});
 });
@@ -132,6 +135,8 @@ Route::middleware(['auth', 'role:admin_rental'])
 
 		Route::get('/bookings', [AdminRentalBookingController::class, 'index'])->name('bookings.index');
 		Route::get('/bookings/{booking:booking_code}', [AdminRentalBookingController::class, 'show'])->name('bookings.show');
+		Route::patch('/bookings/{booking:booking_code}/confirm', [AdminRentalBookingController::class, 'confirmAvailability'])->name('bookings.confirm');
+		Route::patch('/bookings/{booking:booking_code}/reject-availability', [AdminRentalBookingController::class, 'rejectAvailability'])->name('bookings.reject-availability');
 		Route::patch('/bookings/{booking:booking_code}/mark-ongoing', [AdminRentalBookingController::class, 'markOngoing'])->name('bookings.mark-ongoing');
 		Route::patch('/bookings/{booking:booking_code}/mark-completed', [AdminRentalBookingController::class, 'markCompleted'])->name('bookings.mark-completed');
 		Route::patch('/bookings/{booking:booking_code}/cancel', [AdminRentalBookingController::class, 'cancel'])->name('bookings.cancel');

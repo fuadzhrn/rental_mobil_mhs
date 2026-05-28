@@ -5,12 +5,14 @@ namespace App\Http\Controllers\AdminRental;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelBookingRequest;
 use App\Models\Booking;
+use App\Models\Inventory;
 use App\Models\RentalCompany;
 use App\Services\ActivityLogService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -79,7 +81,7 @@ class BookingController extends Controller
         }
 
         $this->ensureBookingBelongsToRental($booking, $rentalCompany->id);
-        $booking->load(['customer', 'vehicle.rentalCompany', 'vehicle.primaryImage', 'payment']);
+        $booking->load(['customer', 'vehicle.rentalCompany', 'vehicle.primaryImage', 'vehicle.inventory', 'payment']);
 
         return view('admin-rental.bookings.show', compact('booking', 'rentalCompany'));
     }
@@ -116,6 +118,103 @@ class BookingController extends Controller
         );
 
         return back()->with('success', 'Booking berhasil diubah menjadi ongoing.');
+    }
+
+    public function confirmAvailability(Booking $booking): RedirectResponse
+    {
+        $this->authorize('update', $booking);
+        $rentalCompany = $this->getRentalCompanyOrAbort();
+        $this->ensureBookingBelongsToRental($booking, $rentalCompany->id);
+
+        if (!in_array($booking->booking_status, [Booking::BOOKING_WAITING_VERIFICATION, Booking::BOOKING_WAITING_PAYMENT, Booking::BOOKING_PENDING], true)) {
+            return back()->with('error', 'Booking tidak dapat dikonfirmasi pada status saat ini.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $inventory = Inventory::where('rental_company_id', $rentalCompany->id)
+                ->where('vehicle_id', $booking->vehicle_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $inventory || ($inventory->available ?? 0) <= 0) {
+                DB::rollBack();
+                return back()->with('error', 'Stok tidak tersedia untuk kendaraan ini.');
+            }
+
+            // reserve one unit
+            $inventory->reserved = max(0, ($inventory->reserved ?? 0) + 1);
+            $inventory->available = max(0, ($inventory->available ?? 0) - 1);
+            $inventory->last_checked_by = Auth::id();
+            $inventory->save();
+
+            $booking->update([
+                'booking_status' => Booking::BOOKING_CONFIRMED,
+            ]);
+
+            $this->notificationService->notifyUser(
+                userId: (int) $booking->customer_id,
+                title: 'Booking Dikonfirmasi',
+                message: 'Booking ' . $booking->booking_code . ' dikonfirmasi dan barang dipesan.',
+                type: 'success',
+                url: route('customer.bookings.show', $booking),
+                referenceType: 'booking',
+                referenceId: $booking->id,
+            );
+
+            $this->activityLogService->log(
+                action: 'booking.confirmed',
+                description: 'Admin rental mengkonfirmasi booking: ' . $booking->booking_code,
+                targetType: 'booking',
+                targetId: $booking->id
+            );
+
+            DB::commit();
+
+            return back()->with('success', 'Booking berhasil dikonfirmasi dan stok di-reserve.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return back()->with('error', 'Terjadi kesalahan saat mengonfirmasi booking.');
+        }
+    }
+
+    public function rejectAvailability(Request $request, Booking $booking): RedirectResponse
+    {
+        $this->authorize('update', $booking);
+        $rentalCompany = $this->getRentalCompanyOrAbort();
+        $this->ensureBookingBelongsToRental($booking, $rentalCompany->id);
+
+        if (!in_array($booking->booking_status, [Booking::BOOKING_WAITING_VERIFICATION, Booking::BOOKING_WAITING_PAYMENT, Booking::BOOKING_PENDING], true)) {
+            return back()->with('error', 'Booking tidak dapat ditolak pada status saat ini.');
+        }
+
+        $note = $request->string('reason')->nullable()->toString();
+
+        $booking->update([
+            'booking_status' => Booking::BOOKING_CANCELLED,
+            'note' => $note ? trim(($booking->note ? $booking->note . PHP_EOL : '') . 'Reject reason: ' . $note) : $booking->note,
+        ]);
+
+        $this->notificationService->notifyUser(
+            userId: (int) $booking->customer_id,
+            title: 'Booking Ditolak',
+            message: 'Permintaan booking ' . $booking->booking_code . ' tidak dapat dipenuhi. Silakan hubungi layanan rental.',
+            type: 'warning',
+            url: route('customer.bookings.show', $booking),
+            referenceType: 'booking',
+            referenceId: $booking->id,
+        );
+
+        $this->activityLogService->log(
+            action: 'booking.rejected',
+            description: 'Admin rental menolak booking: ' . $booking->booking_code,
+            targetType: 'booking',
+            targetId: $booking->id,
+            meta: ['reason' => $note]
+        );
+
+        return back()->with('success', 'Booking telah ditolak.');
     }
 
     public function markCompleted(Booking $booking): RedirectResponse

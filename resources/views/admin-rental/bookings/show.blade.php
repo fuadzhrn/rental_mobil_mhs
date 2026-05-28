@@ -1,112 +1,194 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Booking Admin Rental')
-@section('page_title', 'Detail Booking')
+@section('title', 'Detail Konfirmasi Booking')
+@section('page_title', 'Detail Konfirmasi Booking')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-rental-bookings.css') }}">
+@endpush
 
 @section('content')
-    @if (session('success'))
-        <div style="background:#dcfce7; color:#166534; border-radius:12px; padding:12px; margin-bottom:14px;">{{ session('success') }}</div>
-    @endif
+    <div class="bookings-page bookings-detail-page">
+        @if (session('success'))
+            <div class="admin-flash admin-flash-success">{{ session('success') }}</div>
+        @endif
 
-    @if (session('error'))
-        <div style="background:#fef2f2; color:#991b1b; border-radius:12px; padding:12px; margin-bottom:14px;">{{ session('error') }}</div>
-    @endif
+        @if (session('error'))
+            <div class="admin-flash admin-flash-error">{{ session('error') }}</div>
+        @endif
 
-    <div class="page-description">
-        <strong>Booking Code:</strong> {{ $booking->booking_code }}<br>
-        <strong>Booking Status:</strong> {{ $booking->booking_status_label }}<br>
-        <strong>Payment Status:</strong> {{ $booking->payment_status_label }}
-    </div>
+        <div class="bookings-breadcrumb">
+            <span>Admin Rental</span>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <strong>Detail Konfirmasi Booking</strong>
+        </div>
 
-    <div style="display:grid; grid-template-columns:1.1fr .9fr; gap:20px; margin-top:18px;">
-        <section style="background:#fff; border-radius:16px; padding:16px;">
-            <h2 style="margin-top:0;">Data Booking</h2>
-            <p><strong>Customer:</strong> {{ $booking->customer_name }} ({{ $booking->customer_email }})</p>
-            <p><strong>Kendaraan:</strong> {{ $booking->vehicle->name }}</p>
-            <p><strong>Rental:</strong> {{ $booking->vehicle->rentalCompany?->company_name }}</p>
-            <p><strong>Pickup:</strong> {{ $booking->pickup_date->format('d M Y') }} {{ $booking->pickup_time ? $booking->pickup_time->format('H:i') : '' }}</p>
-            <p><strong>Return:</strong> {{ $booking->return_date->format('d M Y') }}</p>
-            <p><strong>Lokasi Pickup:</strong> {{ $booking->pickup_location }}</p>
-            <p><strong>Lokasi Return:</strong> {{ $booking->return_location ?? '-' }}</p>
-            <p><strong>Durasi:</strong> {{ $booking->duration_days }} Hari</p>
-            <p><strong>Total:</strong> Rp {{ number_format($booking->total_amount, 0, ',', '.') }}</p>
-            <p><strong>Catatan:</strong> {{ $booking->note ?? '-' }}</p>
-
-            <hr style="margin:14px 0; border:0; border-top:1px solid #e5e7eb;">
-            <h3 style="margin-top:0;">Timeline Transaksi</h3>
-            @php
-                $timeline = [
-                    'Booking Dibuat' => true,
-                    'Menunggu Pembayaran' => in_array($booking->booking_status, ['waiting_payment', 'waiting_verification', 'confirmed', 'ongoing', 'completed'], true),
-                    'Menunggu Verifikasi' => in_array($booking->booking_status, ['waiting_verification', 'confirmed', 'ongoing', 'completed'], true),
-                    'Dikonfirmasi' => in_array($booking->booking_status, ['confirmed', 'ongoing', 'completed'], true),
-                    'Sedang Berjalan' => in_array($booking->booking_status, ['ongoing', 'completed'], true),
-                    'Selesai' => $booking->booking_status === 'completed',
-                    'Dibatalkan' => $booking->booking_status === 'cancelled',
-                ];
-            @endphp
-            <div style="display:grid; gap:8px;">
-                @foreach ($timeline as $step => $active)
-                    @if ($active)
-                        <div style="padding:8px 10px; border-radius:8px; background:#ecfdf5; color:#166534;">{{ $step }}</div>
-                    @else
-                        <div style="padding:8px 10px; border-radius:8px; background:#f8fafc; color:#64748b;">{{ $step }}</div>
-                    @endif
-                @endforeach
+        <div class="bookings-header-card bookings-detail-header">
+            <div>
+                <h2>Detail Konfirmasi Booking</h2>
+                <p>Periksa data booking, cek ketersediaan barang, lalu konfirmasi atau tolak sesuai kondisi stok.</p>
+                <small>{{ $booking->booking_code }}</small>
             </div>
-        </section>
 
-        <section style="background:#fff; border-radius:16px; padding:16px;">
-            <h2 style="margin-top:0;">Data Pembayaran & Aksi</h2>
-            <p><strong>Metode:</strong> {{ $booking->payment?->payment_method ?? '-' }}</p>
-            <p><strong>Payment Status:</strong> {{ $booking->payment_status_label }}</p>
-            <p><strong>Rejection Note:</strong> {{ $booking->payment?->rejection_note ?? '-' }}</p>
+            <div class="bookings-detail-badges">
+                <span class="bookings-badge">{{ $booking->booking_status_label }}</span>
+                <span class="bookings-badge is-soft">{{ $booking->payment_status_label }}</span>
+            </div>
+        </div>
 
-            @if ($booking->payment?->proof_payment)
-                @php $proofUrl = asset('storage/' . $booking->payment->proof_payment); @endphp
-                <p><strong>Bukti Pembayaran:</strong></p>
-                @if (str_ends_with(strtolower($booking->payment->proof_payment), '.pdf'))
-                    <a href="{{ $proofUrl }}" target="_blank">Lihat PDF Bukti Pembayaran</a>
-                @else
-                    <img src="{{ $proofUrl }}" alt="Bukti Pembayaran" style="max-width:100%; border-radius:10px; border:1px solid #e5e7eb;">
+        <div class="bookings-detail-grid">
+            <section class="bookings-detail-card">
+                <h3>Data Booking</h3>
+                <dl class="bookings-detail-list">
+                    <div>
+                        <dt>Customer</dt>
+                        <dd>
+                            {{ $booking->customer_name }}<br>
+                            <span>{{ $booking->customer_email }}</span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Kendaraan</dt>
+                        <dd>{{ $booking->vehicle->name }}</dd>
+                    </div>
+                    <div>
+                        <dt>Rental</dt>
+                        <dd>{{ $booking->vehicle->rentalCompany?->company_name }}</dd>
+                    </div>
+                    <div>
+                        <dt>Pickup</dt>
+                        <dd>{{ $booking->pickup_date->format('d M Y') }} {{ $booking->pickup_time ? $booking->pickup_time->format('H:i') : '' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Return</dt>
+                        <dd>{{ $booking->return_date->format('d M Y') }}</dd>
+                    </div>
+                    <div>
+                        <dt>Lokasi Pickup</dt>
+                        <dd>{{ $booking->pickup_location }}</dd>
+                    </div>
+                    <div>
+                        <dt>Lokasi Return</dt>
+                        <dd>{{ $booking->return_location ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Durasi</dt>
+                        <dd>{{ $booking->duration_days }} Hari</dd>
+                    </div>
+                    <div>
+                        <dt>Total</dt>
+                        <dd>Rp {{ number_format($booking->total_amount, 0, ',', '.') }}</dd>
+                    </div>
+                    <div>
+                        <dt>Catatan</dt>
+                        <dd>{{ $booking->note ?? '-' }}</dd>
+                    </div>
+                </dl>
+
+                <div class="bookings-section-divider"></div>
+
+                <h4>Timeline Transaksi</h4>
+                @php
+                    $timeline = [
+                        'Booking Dibuat' => true,
+                        'Menunggu Pembayaran' => in_array($booking->booking_status, ['waiting_payment', 'waiting_verification', 'confirmed', 'ongoing', 'completed'], true),
+                        'Menunggu Verifikasi' => in_array($booking->booking_status, ['waiting_verification', 'confirmed', 'ongoing', 'completed'], true),
+                        'Dikonfirmasi' => in_array($booking->booking_status, ['confirmed', 'ongoing', 'completed'], true),
+                        'Sedang Berjalan' => in_array($booking->booking_status, ['ongoing', 'completed'], true),
+                        'Selesai' => $booking->booking_status === 'completed',
+                        'Dibatalkan' => $booking->booking_status === 'cancelled',
+                    ];
+                @endphp
+                <div class="bookings-timeline">
+                    @foreach ($timeline as $step => $active)
+                        <div class="bookings-timeline-item {{ $active ? 'is-active' : '' }}">{{ $step }}</div>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="bookings-detail-card">
+                <h3>Data Pembayaran & Aksi</h3>
+                <dl class="bookings-detail-list">
+                    <div>
+                        <dt>Metode</dt>
+                        <dd>{{ $booking->payment?->payment_method ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Status Pembayaran</dt>
+                        <dd>{{ $booking->payment_status_label }}</dd>
+                    </div>
+                    <div>
+                        <dt>Rejection Note</dt>
+                        <dd>{{ $booking->payment?->rejection_note ?? '-' }}</dd>
+                    </div>
+                </dl>
+
+                @if ($booking->payment?->proof_payment)
+                    @php $proofUrl = asset('storage/' . $booking->payment->proof_payment); @endphp
+                    <div class="bookings-proof-card">
+                        <p class="bookings-proof-label">Bukti Pembayaran</p>
+                        @if (str_ends_with(strtolower($booking->payment->proof_payment), '.pdf'))
+                            <a href="{{ $proofUrl }}" target="_blank" class="bookings-proof-link">Lihat PDF Bukti Pembayaran</a>
+                        @else
+                            <img src="{{ $proofUrl }}" alt="Bukti Pembayaran">
+                        @endif
+                    </div>
                 @endif
-            @endif
 
-            <hr style="margin:14px 0; border:0; border-top:1px solid #e5e7eb;">
-            <h3 style="margin-top:0;">Aksi Status Operasional</h3>
+                <div class="bookings-section-divider"></div>
 
-            @if ($booking->booking_status === \App\Models\Booking::BOOKING_CONFIRMED && $booking->payment_status === \App\Models\Booking::PAYMENT_VERIFIED)
-                <form method="POST" action="{{ route('admin-rental.bookings.mark-ongoing', $booking) }}" style="margin-bottom:10px;">
-                    @csrf
-                    @method('PATCH')
-                    <button type="submit" class="btn btn-primary">Mark Ongoing</button>
-                </form>
-            @endif
+                <h4>Aksi Konfirmasi</h4>
 
-            @if ($booking->booking_status === \App\Models\Booking::BOOKING_ONGOING)
-                <form method="POST" action="{{ route('admin-rental.bookings.mark-completed', $booking) }}" style="margin-bottom:10px;">
-                    @csrf
-                    @method('PATCH')
-                    <button type="submit" class="btn btn-primary">Mark Completed</button>
-                </form>
-            @endif
+                @if (in_array($booking->booking_status, [\App\Models\Booking::BOOKING_WAITING_PAYMENT, \App\Models\Booking::BOOKING_WAITING_VERIFICATION, \App\Models\Booking::BOOKING_PENDING], true))
+                    <div class="bookings-action-stack">
+                        <form method="POST" action="{{ route('admin-rental.bookings.confirm', $booking) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="bookings-primary-action">Confirm Availability</button>
+                        </form>
 
-            @if (in_array($booking->booking_status, [\App\Models\Booking::BOOKING_WAITING_PAYMENT, \App\Models\Booking::BOOKING_WAITING_VERIFICATION, \App\Models\Booking::BOOKING_CONFIRMED], true))
-                <form method="POST" action="{{ route('admin-rental.bookings.cancel', $booking) }}">
-                    @csrf
-                    @method('PATCH')
-                    <label for="cancel_reason" style="font-weight:600; display:block; margin-bottom:6px;">Alasan Cancel (opsional)</label>
-                    <textarea name="cancel_reason" id="cancel_reason" rows="3" style="width:100%; border:1px solid #d1d5db; border-radius:8px; padding:8px;"></textarea>
-                    @error('cancel_reason')
-                        <small style="color:#dc2626;">{{ $message }}</small>
-                    @enderror
-                    <button type="submit" class="btn btn-outline" style="margin-top:8px;">Cancel Booking</button>
-                </form>
-            @endif
+                        <form method="POST" action="{{ route('admin-rental.bookings.reject-availability', $booking) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="reason" value="Tidak tersedia">
+                            <button type="submit" class="bookings-secondary-action">Reject Availability</button>
+                        </form>
+                    </div>
+                @endif
 
-            @if ($booking->booking_status === \App\Models\Booking::BOOKING_COMPLETED)
-                <p style="background:#ecfeff; color:#155e75; border-radius:10px; padding:10px;">Booking completed. Data ini siap menjadi dasar fitur review pada tahap berikutnya.</p>
-            @endif
-        </section>
+                @if ($booking->booking_status === \App\Models\Booking::BOOKING_CONFIRMED && $booking->payment_status === \App\Models\Booking::PAYMENT_VERIFIED)
+                    <form method="POST" action="{{ route('admin-rental.bookings.mark-ongoing', $booking) }}" class="bookings-inline-form">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="bookings-primary-action is-ongoing">Mark Ongoing</button>
+                    </form>
+                @endif
+
+                @if ($booking->booking_status === \App\Models\Booking::BOOKING_ONGOING)
+                    <form method="POST" action="{{ route('admin-rental.bookings.mark-completed', $booking) }}" class="bookings-inline-form">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="bookings-primary-action is-completed">Mark Completed</button>
+                    </form>
+                @endif
+
+                @if (in_array($booking->booking_status, [\App\Models\Booking::BOOKING_WAITING_PAYMENT, \App\Models\Booking::BOOKING_WAITING_VERIFICATION, \App\Models\Booking::BOOKING_CONFIRMED], true))
+                    <form method="POST" action="{{ route('admin-rental.bookings.cancel', $booking) }}" class="bookings-cancel-form">
+                        @csrf
+                        @method('PATCH')
+                        <label for="cancel_reason">Alasan Cancel (opsional)</label>
+                        <textarea name="cancel_reason" id="cancel_reason" rows="3" placeholder="Tulis alasan pembatalan di sini..."></textarea>
+                        @error('cancel_reason')
+                            <small>{{ $message }}</small>
+                        @enderror
+                        <button type="submit" class="bookings-secondary-action is-cancel">Cancel Booking</button>
+                    </form>
+                @endif
+
+                @if ($booking->booking_status === \App\Models\Booking::BOOKING_COMPLETED)
+                    <div class="bookings-success-note">Booking completed. Data ini siap menjadi dasar fitur review pada tahap berikutnya.</div>
+                @endif
+            </section>
+        </div>
     </div>
 @endsection

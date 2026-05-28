@@ -65,7 +65,7 @@ Semua akun menggunakan password: `password123`
 	- Akses: `/super-admin/dashboard`
 
 - **Admin Rental**
-	- Email: `adminrental@example.com`
+	- Email: `adminrentall@example.com`
 	- Password: `password123`
 	- Role: `admin_rental`
 	- Akses: `/admin-rental/dashboard`

@@ -15,6 +15,7 @@
         <div class="header-actions desktop-actions">
             @auth
                 @if (auth()->user()->role === 'customer')
+                    <a href="{{ route('notifications.index') }}" class="auth-link {{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">Notifikasi</a>
                     <a href="{{ route('customer.bookings.index') }}" class="auth-link">My Booking</a>
                 @elseif (auth()->user()->role === 'super_admin')
                     <a href="{{ route('super-admin.dashboard') }}" class="auth-link">Dashboard Admin</a>
@@ -62,6 +63,7 @@
 
             @auth
                 @if (auth()->user()->role === 'customer')
+                    <a href="{{ route('notifications.index') }}" class="mobile-auth-link {{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">Notifikasi</a>
                     <a href="{{ route('customer.bookings.index') }}" class="mobile-auth-link">My Booking</a>
                 @elseif (auth()->user()->role === 'super_admin')
                     <a href="{{ route('super-admin.dashboard') }}" class="mobile-auth-link">Dashboard Admin</a>
