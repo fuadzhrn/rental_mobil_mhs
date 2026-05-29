@@ -194,11 +194,6 @@
                                                     <i class="bi bi-x-circle" aria-hidden="true"></i>
                                                     <span>Tolak</span>
                                                 </a>
-                                            @else
-                                                <span class="payments-action-btn is-disabled" aria-disabled="true">
-                                                    <i class="bi bi-lock" aria-hidden="true"></i>
-                                                    <span>Terkunci</span>
-                                                </span>
                                             @endif
                                         </div>
                                     </td>

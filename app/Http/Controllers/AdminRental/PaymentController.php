@@ -35,6 +35,8 @@ class PaymentController extends Controller
             ->with(['customer', 'vehicle', 'payment'])
             ->where('rental_company_id', $rentalCompany->id)
             ->whereHas('payment')
+            // Exclude bookings that have been cancelled so payments won't show for cancelled bookings
+            ->where('booking_status', '!=', Booking::BOOKING_CANCELLED)
             ->latest('id')
             ->paginate(10);
 

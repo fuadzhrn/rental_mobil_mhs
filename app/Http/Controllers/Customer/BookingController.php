@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\RentalCompany;
 use App\Models\Payment;
 use App\Models\Vehicle;
+use App\Models\Inventory;
 use App\Services\ActivityLogService;
 use App\Services\NotificationService;
 use App\Services\PromoService;
@@ -192,15 +193,17 @@ class BookingController extends Controller
 
     private function isVehicleBookedForDateRange(int $vehicleId, Carbon $pickupDate, Carbon $returnDate): bool
     {
-        return Booking::query()
+        $blockingStatuses = [
+            Booking::BOOKING_WAITING_PAYMENT,
+            Booking::BOOKING_WAITING_VERIFICATION,
+            Booking::BOOKING_CONFIRMED,
+            Booking::BOOKING_ONGOING,
+            Booking::BOOKING_PENDING,
+        ];
+
+        $overlappingCount = Booking::query()
             ->where('vehicle_id', $vehicleId)
-            ->whereIn('booking_status', [
-                Booking::BOOKING_WAITING_PAYMENT,
-                Booking::BOOKING_WAITING_VERIFICATION,
-                Booking::BOOKING_CONFIRMED,
-                Booking::BOOKING_ONGOING,
-                Booking::BOOKING_PENDING,
-            ])
+            ->whereIn('booking_status', $blockingStatuses)
             ->where(function ($query) use ($pickupDate, $returnDate): void {
                 $query->whereBetween('pickup_date', [$pickupDate->toDateString(), $returnDate->toDateString()])
                     ->orWhereBetween('return_date', [$pickupDate->toDateString(), $returnDate->toDateString()])
@@ -209,6 +212,17 @@ class BookingController extends Controller
                             ->where('return_date', '>=', $returnDate->toDateString());
                     });
             })
-            ->exists();
+            ->count();
+
+        $inventory = Inventory::where('vehicle_id', $vehicleId)->first();
+
+        if (! $inventory) {
+            // Fallback to single-unit behavior when inventory not tracked
+            return $overlappingCount > 0;
+        }
+
+        $availableUnits = $inventory->available ?? ($inventory->total - ($inventory->reserved ?? 0));
+
+        return $overlappingCount >= max(1, (int) $availableUnits);
     }
 }

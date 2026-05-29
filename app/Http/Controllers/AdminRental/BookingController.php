@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelBookingRequest;
 use App\Models\Booking;
 use App\Models\Inventory;
+use App\Models\Payment;
 use App\Models\RentalCompany;
 use App\Services\ActivityLogService;
 use App\Services\NotificationService;
@@ -189,32 +190,42 @@ class BookingController extends Controller
             return back()->with('error', 'Booking tidak dapat ditolak pada status saat ini.');
         }
 
-        $note = $request->string('reason')->nullable()->toString();
+        $note = $request->filled('reason') ? $request->string('reason')->toString() : null;
 
-        $booking->update([
-            'booking_status' => Booking::BOOKING_CANCELLED,
-            'note' => $note ? trim(($booking->note ? $booking->note . PHP_EOL : '') . 'Reject reason: ' . $note) : $booking->note,
-        ]);
+        DB::transaction(function () use ($booking, $note) {
+            if ($booking->payment) {
+                $booking->payment->update([
+                    'payment_status' => Payment::STATUS_REJECTED,
+                    'rejection_note' => $note ?? 'Pembayaran dibatalkan karena booking dibatalkan oleh admin.',
+                ]);
+            }
 
-        $this->notificationService->notifyUser(
-            userId: (int) $booking->customer_id,
-            title: 'Booking Ditolak',
-            message: 'Permintaan booking ' . $booking->booking_code . ' tidak dapat dipenuhi. Silakan hubungi layanan rental.',
-            type: 'warning',
-            url: route('customer.bookings.show', $booking),
-            referenceType: 'booking',
-            referenceId: $booking->id,
-        );
+            $booking->update([
+                'booking_status' => Booking::BOOKING_CANCELLED,
+                'payment_status' => Booking::PAYMENT_REJECTED,
+                'note' => $note ? trim(($booking->note ? $booking->note . PHP_EOL : '') . 'Reject reason: ' . $note) : $booking->note,
+            ]);
 
-        $this->activityLogService->log(
-            action: 'booking.rejected',
-            description: 'Admin rental menolak booking: ' . $booking->booking_code,
-            targetType: 'booking',
-            targetId: $booking->id,
-            meta: ['reason' => $note]
-        );
+            $this->notificationService->notifyUser(
+                userId: (int) $booking->customer_id,
+                title: 'Booking Dibatalkan',
+                message: 'Booking ' . $booking->booking_code . ' telah dibatalkan oleh admin. Alasan: ' . ($note ?? '—'),
+                type: 'warning',
+                url: route('customer.bookings.show', $booking),
+                referenceType: 'booking',
+                referenceId: $booking->id,
+            );
 
-        return back()->with('success', 'Booking telah ditolak.');
+            $this->activityLogService->log(
+                action: 'booking.cancelled',
+                description: 'Admin rental membatalkan booking: ' . $booking->booking_code,
+                targetType: 'booking',
+                targetId: $booking->id,
+                meta: ['reason' => $note]
+            );
+        });
+
+        return back()->with('success', 'Booking telah dibatalkan dan pembayaran ditandai rejected.');
     }
 
     public function markCompleted(Booking $booking): RedirectResponse
