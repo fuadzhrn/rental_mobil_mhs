@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminRental;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Http\Requests\UpdateVehicleRequest;
+use App\Models\Inventory;
 use App\Models\RentalCompany;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
@@ -118,6 +119,14 @@ class VehicleController extends Controller
             'main_image' => $mainImagePath,
         ]);
 
+        Inventory::create([
+            'rental_company_id' => $rentalCompany->id,
+            'vehicle_id'        => $vehicle->id,
+            'total'             => 0,
+            'reserved'          => 0,
+            'available'         => 0,
+        ]);
+
         $this->storeGalleryImages($request, $vehicle);
 
         $this->activityLogService->log(
@@ -221,12 +230,21 @@ class VehicleController extends Controller
                 ->with('error', 'Akun admin rental ini belum memiliki rental company. Silakan lengkapi data rental company terlebih dahulu.');
         }
 
+        if ($vehicle->bookings()->exists()) {
+            return redirect()
+                ->route('admin-rental.vehicles.index')
+                ->with('error', 'Kendaraan tidak dapat dihapus karena memiliki riwayat booking.');
+        }
+
         $this->fileUploadService->deletePublic($vehicle->main_image);
 
         foreach ($vehicle->images as $image) {
             $this->fileUploadService->deletePublic($image->image_path);
             $image->delete();
         }
+
+        $vehicle->reviews()->delete();
+        $vehicle->inventory()->delete();
 
         $deletedVehicleId = $vehicle->id;
         $deletedVehicleName = $vehicle->name;
